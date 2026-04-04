@@ -1,22 +1,22 @@
 import React from 'react';
 
-const StatsStrip = () => {
-  const stats = [
-    { value: '500+', label: 'Students Trained', description: 'Expertly trained and placed in top global firms.' },
-    { value: '15+', label: 'Industry Experts', description: 'Directly mentoring your personalized career path.' },
-    { value: '95%', label: 'Success Rate', description: 'Exceptional placement and certification rate.' },
-    { value: '25+', label: 'Tech Programs', description: 'Cutting-edge courses designed for modern tech.' },
-  ];
+const stats = [
+  { id: 'students-trained', value: '500+', label: 'Students Trained', description: 'Expertly trained and placed in top global firms.' },
+  { id: 'industry-experts', value: '15+', label: 'Industry Experts', description: 'Directly mentoring your personalized career path.' },
+  { id: 'success-rate', value: '95%', label: 'Success Rate', description: 'Exceptional placement and certification rate.' },
+  { id: 'tech-programs', value: '25+', label: 'Tech Programs', description: 'Cutting-edge courses designed for modern tech.' },
+];
 
+const StatsStrip = () => {
   return (
     <section className="bg-navy-900 dark:bg-navy-900/50 py-16 border-b border-white/5 relative overflow-hidden transition-colors duration-500">
       <div className="absolute top-0 right-0 w-full h-full bg-accent/5 skew-x-12 translate-x-1/2 blur-[150px] opacity-20 pointer-events-none"></div>
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
-          {stats.map((stat, idx) => (
+          {stats.map((stat) => (
             <div
-              key={idx}
+              key={stat.id}
               className="text-center group hover:scale-105 transition-transform duration-700"
             >
               <div className="inline-block px-3 py-1 bg-accent/10 rounded-full mb-4 border border-accent/20 shadow-xl shadow-accent/5 opacity-0 group-hover:opacity-100 transition-opacity">

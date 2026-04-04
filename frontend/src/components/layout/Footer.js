@@ -1,5 +1,18 @@
 import React from 'react';
 
+const socialLinks = [
+  { id: 'facebook', name: 'FB', url: 'https://www.facebook.com/ssptechedu' },
+  { id: 'instagram', name: 'IG', url: 'https://www.instagram.com/ssptechedu/' },
+  { id: 'linkedin', name: 'LN', url: 'https://www.linkedin.com/company/ssp-tech-edu/' },
+  { id: 'youtube', name: 'YT', url: 'https://www.youtube.com/@ssptechedu' },
+];
+
+const contactItems = [
+  { id: 'phone', label: 'Phone', text: '+91 70755 05229' },
+  { id: 'mail', label: 'Mail', text: 'persevcareers@gmail.com' },
+  { id: 'pin', label: 'Pin', text: 'Tirupati, AP, India' },
+];
+
 const Footer = () => {
   return (
     <footer className="bg-white dark:bg-navy-900 text-navy-900 dark:text-white border-t border-gray-100 dark:border-navy-900/50 pt-24 pb-12 transition-colors duration-300">
@@ -14,14 +27,9 @@ const Footer = () => {
               Empowering the next generation of tech leaders through industry-driven education and mentor-led training in Tirupati and beyond.
             </p>
             <div className="flex space-x-5">
-              {[
-                { name: 'FB', url: 'https://www.facebook.com/ssptechedu' },
-                { name: 'IG', url: 'https://www.instagram.com/ssptechedu/' },
-                { name: 'LN', url: 'https://www.linkedin.com/company/ssp-tech-edu/' },
-                { name: 'YT', url: 'https://www.youtube.com/@ssptechedu' }
-              ].map((social, i) => (
+              {socialLinks.map((social) => (
                 <a
-                  key={i}
+                  key={social.id}
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -46,12 +54,8 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-black uppercase tracking-widest text-blue-600 dark:text-accent mb-8">Contact Info</h4>
             <ul className="space-y-6">
-              {[
-                { label: 'Phone', text: '+91 70755 05229' },
-                { label: 'Mail', text: 'persevcareers@gmail.com' },
-                { label: 'Pin', text: 'Tirupati, AP, India' },
-              ].map((item, i) => (
-                <li key={i} className="flex flex-col space-y-1">
+              {contactItems.map((item) => (
+                <li key={item.id} className="flex flex-col space-y-1">
                   <span className="text-blue-600 dark:text-accent font-black text-[10px] uppercase tracking-widest">{item.label}</span>
                   <span className="text-gray-500 dark:text-gray-400 font-medium text-lg">{item.text}</span>
                 </li>
@@ -61,7 +65,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-100 dark:border-navy-900/50 mt-20 pt-10 flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm font-medium">
-          <p>© {new Date().getFullYear()} Perseverance Software Training Institute. All rights reserved.</p>
+          <p>(c) {new Date().getFullYear()} Perseverance Software Training Institute. All rights reserved.</p>
           <div className="flex space-x-8 mt-4 md:mt-0">
             <a href="#privacy" className="hover:text-navy-900 dark:hover:text-white transition-colors">Privacy Policy</a>
             <a href="#terms" className="hover:text-navy-900 dark:hover:text-white transition-colors">Terms of Service</a>

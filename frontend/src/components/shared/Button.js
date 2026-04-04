@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 
 const Button = ({ children, variant = 'primary', className = '', ...props }) => {
@@ -18,6 +19,12 @@ const Button = ({ children, variant = 'primary', className = '', ...props }) => 
       {children}
     </button>
   );
+};
+
+Button.propTypes = {
+  children: PropTypes.node,
+  variant: PropTypes.oneOf(['primary', 'secondary', 'outline', 'accent']),
+  className: PropTypes.string,
 };
 
 export default Button;

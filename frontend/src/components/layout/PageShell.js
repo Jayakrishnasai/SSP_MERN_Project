@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
@@ -12,6 +13,10 @@ const PageShell = ({ children }) => {
       <Footer />
     </div>
   );
+};
+
+PageShell.propTypes = {
+  children: PropTypes.node,
 };
 
 export default PageShell;

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 
 const SectionTitle = ({ title, subtitle, centered = false, dark = false }) => {
@@ -18,6 +19,13 @@ const SectionTitle = ({ title, subtitle, centered = false, dark = false }) => {
       )}
     </div>
   );
+};
+
+SectionTitle.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
+  centered: PropTypes.bool,
+  dark: PropTypes.bool,
 };
 
 export default SectionTitle;
