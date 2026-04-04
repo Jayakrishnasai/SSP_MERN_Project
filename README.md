@@ -25,20 +25,35 @@
 
 ---
 
-# 🌟 OVERVIEW
+# 👨‍💻 ABOUT THE DEVELOPER
 
 <div align="center">
 
-<img src="https://readme-typing-svg.herokuapp.com?size=22&duration=2000&color=00FFAB&center=true&vCenter=true&width=900&lines=Production-Grade+MERN+Application;Built+with+DevOps+Best+Practices;Engineered+for+Scalability+and+Maintainability"/>
+<img src="https://readme-typing-svg.herokuapp.com?size=24&duration=2000&color=00FFAB&center=true&vCenter=true&width=900&lines=DevOps+Engineer+%7C+Full+Stack+Developer;Building+Scalable+Production+Systems;Focused+on+Automation+%26+Cloud"/>
 
 </div>
 
-A **full-stack MERN monorepo system** integrating modern development and DevOps workflows:
+```text
+Final-Year Computer Science Engineer
+Specializing in DevOps + Cloud + Full Stack Development
 
-- Modular architecture  
-- Automated CI/CD pipelines  
-- Code quality enforcement (SonarCloud)  
-- Containerized deployment  
+✔ CI/CD Pipelines (GitHub Actions)
+✔ Docker & Containerization
+✔ AWS Deployment (EC2)
+✔ Backend + Frontend Integration
+✔ Production-Ready System Design
+```
+
+---
+
+# 🌟 OVERVIEW
+
+A **production-grade MERN monorepo application** engineered with:
+
+- Scalability  
+- Maintainability  
+- Automation  
+- Code Quality Enforcement  
 
 ---
 
@@ -46,26 +61,25 @@ A **full-stack MERN monorepo system** integrating modern development and DevOps 
 
 ## 🎯 Application
 - Responsive React UI  
-- CRUD operations (Courses API)  
-- RESTful architecture  
-- Error handling & validation  
+- CRUD operations (Courses)  
+- RESTful APIs  
+- Validation & error handling  
 
 ## ⚙️ Backend
-- Express.js modular structure  
+- Express modular architecture  
 - Mongoose schema validation  
-- Clean routing + controllers  
-- Health check endpoints  
+- Clean routing & controllers  
+- Health endpoints  
 
 ## 🐳 DevOps
-- Dockerized services  
+- Dockerized architecture  
 - Nginx frontend serving  
-- Multi-container orchestration  
+- Multi-container setup  
 
 ## 🚀 CI/CD
 - GitHub Actions pipeline  
-- SonarCloud integration  
-- Automated testing  
-- Docker build & deploy  
+- SonarCloud analysis  
+- Automated build & deploy  
 
 ---
 
@@ -74,9 +88,9 @@ A **full-stack MERN monorepo system** integrating modern development and DevOps 
 ```text
 Browser
    ↓
-Nginx (Frontend - React)
+Nginx (React Frontend)
    ↓
-Node.js Backend (Express API)
+Node.js Backend (Express)
    ↓
 MongoDB Database
 ```
@@ -86,11 +100,7 @@ MongoDB Database
 # 🔄 REQUEST FLOW
 
 ```text
-1. User loads frontend
-2. API call → /courses
-3. Backend validates request
-4. DB interaction via Mongoose
-5. Response → UI update
+User → Frontend → API (/courses) → Backend → DB → Response → UI
 ```
 
 ---
@@ -98,26 +108,25 @@ MongoDB Database
 # 🛠️ TECH STACK
 
 ## 🎨 Frontend
-- React 17  
+- React  
 - Tailwind CSS  
 - Axios  
-- React Testing Library  
 
 ## ⚙️ Backend
-- Node.js 20  
-- Express.js  
+- Node.js  
+- Express  
 - Mongoose  
-- Jest  
 
-## 🧪 Quality
-- LCOV Coverage  
-- SonarCloud Analysis  
+## 🧪 Testing
+- Jest  
+- React Testing Library  
 
 ## 🚀 DevOps
-- Docker & Docker Compose  
+- Docker  
 - GitHub Actions  
 - AWS EC2  
 - Nginx  
+- SonarCloud  
 
 ---
 
@@ -138,7 +147,7 @@ SSP_MERN_Project/
 # 🚀 GETTING STARTED
 
 ```bash
-git clone https://github.com/Jayakrishnasai/SSP_MERN_Project.git
+git clone https://github.com/YOUR_USERNAME/SSP_MERN_Project.git
 cd SSP_MERN_Project
 ```
 
@@ -175,19 +184,12 @@ docker compose up -d --build
 
 # 🧪 TESTING
 
-## Backend
 ```bash
-cd backend
-npm test -- --runInBand
+cd backend && npm test
+cd frontend && npm test -- --coverage
 ```
 
-## Frontend
-```bash
-cd frontend
-npm test -- --coverage
-```
-
-✔ Coverage sent to SonarCloud  
+✔ Coverage → SonarCloud  
 ✔ Uses LCOV  
 
 ---
@@ -195,7 +197,7 @@ npm test -- --coverage
 # ⚙️ CI/CD PIPELINE
 
 ```text
-Code → Test → Coverage → Sonar Analysis → Docker Build → Deploy (EC2)
+Code → Test → Coverage → Sonar → Docker → Deploy (AWS EC2)
 ```
 
 ---
@@ -203,29 +205,24 @@ Code → Test → Coverage → Sonar Analysis → Docker Build → Deploy (EC2)
 # 📊 SONARCLOUD
 
 - Code quality checks  
-- Coverage enforcement ≥ 80%  
+- Coverage ≥ 80%  
 - Security analysis  
-- Maintainability rating  
+- Maintainability  
 
 ---
 
 # ☁️ DEPLOYMENT
 
 ```text
-1. Build Docker images
-2. Tag with commit SHA
-3. Push to registry
-4. SSH into EC2
-5. Pull images
-6. Restart containers
+Build → Tag → Push → SSH → Pull → Restart Containers
 ```
 
 ---
 
 # 🔒 SECURITY
 
-- No hardcoded secrets  
 - GitHub Secrets used  
+- No hardcoded credentials  
 - MongoDB secured  
 - Environment configs  
 
@@ -234,9 +231,9 @@ Code → Test → Coverage → Sonar Analysis → Docker Build → Deploy (EC2)
 # 🧬 FUTURE IMPROVEMENTS
 
 - JWT Authentication  
-- Kubernetes deployment  
+- Kubernetes  
 - Redis caching  
-- Monitoring stack (Prometheus + Grafana)  
+- Monitoring stack  
 
 ---
 
@@ -253,6 +250,22 @@ Code → Test → Coverage → Sonar Analysis → Docker Build → Deploy (EC2)
 
 ---
 
+# 🌐 CONNECT
+
+<div align="center">
+
+<a href="https://linkedin.com/in/YOUR_LINK">
+<img src="https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge"/>
+</a>
+
+<a href="mailto:YOUR_EMAIL">
+<img src="https://img.shields.io/badge/Email-Contact-red?style=for-the-badge"/>
+</a>
+
+</div>
+
+---
+
 # 🏁 FINAL SIGNATURE
 
 <div align="center">
@@ -261,7 +274,7 @@ Code → Test → Coverage → Sonar Analysis → Docker Build → Deploy (EC2)
 
 <br>
 
-<img src="https://readme-typing-svg.herokuapp.com?size=24&duration=2200&color=00BFFF&center=true&vCenter=true&width=900&lines=ॐ+नमः+शिवाय;ॐ+नमो+नारायणाय;Divine+Energy+%7C+Focused+Mind+%7C+Powerful+Execution"/>
+<img src="https://readme-typing-svg.herokuapp.com?size=24&duration=2200&color=00BFFF&center=true&vCenter=true&width=900&lines=ॐ+नमः+शिवाय;ॐ+नमो+नारायणाय;Inner+Stability+%7C+Focused+Execution+%7C+Scalable+Systems"/>
 
 <br><br>
 
@@ -274,10 +287,6 @@ Code → Test → Coverage → Sonar Analysis → Docker Build → Deploy (EC2)
 <img src="https://readme-typing-svg.herokuapp.com?size=20&duration=2000&color=87CEFA&center=true&vCenter=true&width=800&lines=Code+with+Clarity;Build+with+Discipline;Deliver+with+Devotion"/>
 
 <br><br>
-
-### 💙 Made with ❤️ by SSP (Perseverance Software Training Institute)
-
-</div>
 
 <img src="https://img.shields.io/badge/Made%20with-❤️-ff0000?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/By-SSP-00F5FF?style=for-the-badge"/>
