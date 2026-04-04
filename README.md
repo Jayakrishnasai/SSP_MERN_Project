@@ -294,6 +294,6 @@ Build → Tag → Push → SSH → Pull → Restart Containers
 
 <br><br>
 
-### 💙 Made with ❤️ by SSP (Perseverance Software Training Institute)
+### 💙 Made with ❤️ by SSP GLOBAL
 
 </div>
