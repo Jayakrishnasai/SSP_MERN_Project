@@ -1,12 +1,14 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=64ffda&height=200&section=header&text=SSP%20MERN%20Project&fontSize=40&fontColor=ffffff&animation=fadeIn"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=64ffda&height=220&section=header&text=SSP%20MERN%20Project&fontSize=40&fontColor=ffffff&animation=fadeIn"/>
 
-<img src="https://readme-typing-svg.herokuapp.com?size=25&duration=3000&color=64FFDA&center=true&vCenter=true&width=700&lines=Full+Stack+MERN+Application;Dockerized+%26+CI%2FCD+Enabled;Production+Ready+Platform;Built+for+Real+World+Deployment"/>
+<img src="https://readme-typing-svg.herokuapp.com?size=25&duration=3000&color=64FFDA&center=true&vCenter=true&width=750&lines=Full+Stack+MERN+Application;Dockerized+%26+CI%2FCD+Enabled;Production+Ready+Platform;Built+for+Real+World+Deployment"/>
 
 <br>
 
-<b>🚀 Perseverance Software Training Institute Platform</b>
+### 🚀 Perseverance Software Training Institute Platform
+
+<b>A modern, scalable, production-ready MERN application with DevOps integration</b>
 
 <br><br>
 
@@ -29,32 +31,20 @@
 
 ## 🌟 Overview
 
-<div align="center">
-
-✨ A production-ready MERN application built for scalability and performance.
-
-🔥 Clean UI  
-⚡ Fast Backend  
-🐳 Dockerized  
-🚀 CI/CD Enabled  
-📊 Sonar Verified  
-
-</div>
+✨ Production-ready MERN platform with modern UI, scalable backend, and DevOps automation.
 
 ---
 
 ## 🏗️ Architecture
 
-Browser → Frontend → Backend → MongoDB
+Browser → Frontend (Nginx :80) → Backend → MongoDB
 
 ---
 
 ## ⚡ Live Flow
 
 <div align="center">
-
 <img src="https://media.giphy.com/media/qgQUggAC3Pfv687qPC/giphy.gif" width="500"/>
-
 </div>
 
 ---
