@@ -1,19 +1,27 @@
-name: CI/CD Production Pipeline
+name: Enterprise CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [main]
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  BACKEND_IMAGE: jayakrishnasai/ssp-backend
+  FRONTEND_IMAGE: jayakrishnasai/ssp-frontend
 
 jobs:
-  sonar-analysis:
-    name: SonarQube Analysis
+  quality-check:
+    name: Lint, Test and Build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
@@ -21,24 +29,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
           cache-dependency-path: |
-            frontend/package-lock.json
             backend/package-lock.json
-
-      - name: Verify Node and NPM Versions
-        run: |
-          node -v
-          npm -v
-
-      - name: Install Frontend Dependencies
-        working-directory: frontend
-        run: npm ci --ignore-scripts --no-audit
-
-      - name: Build Frontend
-        working-directory: frontend
-        run: npm run build
+            frontend/package-lock.json
 
       - name: Install Backend Dependencies
         working-directory: backend
@@ -48,57 +43,141 @@ jobs:
         working-directory: backend
         run: npm test -- --runInBand
 
-      - name: SonarCloud Scan
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci --ignore-scripts --no-audit
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Upload Backend Coverage
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808
+        with:
+          name: backend-coverage
+          path: backend/coverage/lcov.info
+
+  sonar:
+    name: Sonar Analysis
+    needs: quality-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Download Backend Coverage
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16
+        with:
+          name: backend-coverage
+          path: backend/coverage
+
+      - name: Sonar Scan
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
-      - name: Print Sonar Report URL
-        run: |
-          echo "Sonar Report:"
-          cat .scannerwork/report-task.txt || true
-
-      - name: SonarQube Quality Gate Check
+      - name: Quality Gate
         uses: sonarsource/sonarqube-quality-gate-action@d304d050d930b02a896b0f85935344f023928496
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+  docker:
+    name: Build and Push Images
+    needs: sonar
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set Short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: Build Backend Image
+        run: |
+          docker build \
+            -t $BACKEND_IMAGE:$SHORT_SHA \
+            -t $BACKEND_IMAGE:latest \
+            ./backend
+
+      - name: Build Frontend Image
+        run: |
+          docker build \
+            -t $FRONTEND_IMAGE:$SHORT_SHA \
+            -t $FRONTEND_IMAGE:latest \
+            ./frontend
+
+      - name: Push Backend Image
+        run: |
+          docker push $BACKEND_IMAGE:$SHORT_SHA
+          docker push $BACKEND_IMAGE:latest
+
+      - name: Push Frontend Image
+        run: |
+          docker push $FRONTEND_IMAGE:$SHORT_SHA
+          docker push $FRONTEND_IMAGE:latest
+
+  security:
+    name: Trivy Scan
+    needs: docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Scan Backend Image
+        uses: aquasecurity/trivy-action@6e6e1c0a3a3c5a4d06a1848b8c8d5c0e6c28d1cb
+        with:
+          image-ref: ${{ env.BACKEND_IMAGE }}:latest
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+
+      - name: Scan Frontend Image
+        uses: aquasecurity/trivy-action@6e6e1c0a3a3c5a4d06a1848b8c8d5c0e6c28d1cb
+        with:
+          image-ref: ${{ env.FRONTEND_IMAGE }}:latest
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+
   deploy:
-    name: Deploy to AWS EC2
-    needs: sonar-analysis
+    name: Deploy to EC2
+    needs: security
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: SSH and Deploy to EC2
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262
+        env:
+          BACKEND_IMAGE: ${{ env.BACKEND_IMAGE }}
+          FRONTEND_IMAGE: ${{ env.FRONTEND_IMAGE }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: BACKEND_IMAGE,FRONTEND_IMAGE,GITHUB_SHA
           script: |
             set -e
 
-            echo "Navigating to project..."
+            SHORT_SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
+
             cd ~/SSP_MERN_Project
 
-            echo "Pulling latest code..."
-            git fetch origin
-            git reset --hard origin/main
+            export BACKEND_IMAGE_TAG="$BACKEND_IMAGE:$SHORT_SHA"
+            export FRONTEND_IMAGE_TAG="$FRONTEND_IMAGE:$SHORT_SHA"
 
-            echo "Stopping existing containers..."
             docker compose down --remove-orphans
-
-            echo "Removing unused containers..."
-            docker container prune -f
-
-            echo "Rebuilding containers..."
+            docker compose pull || true
             docker compose up -d --build --remove-orphans
 
-            echo "Cleaning images..."
-            docker image prune -f
-
-            echo "Deployment completed. Running containers:"
+            docker image prune -af
             docker ps
