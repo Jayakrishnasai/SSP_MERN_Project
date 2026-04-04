@@ -1,185 +1,276 @@
----
-
-# 🌌 IMMERSIVE EXPERIENCE LAYER
-
 <div align="center">
 
-<img src="https://readme-typing-svg.herokuapp.com?size=28&duration=2000&color=00F5FF&center=true&vCenter=true&width=1000&lines=Welcome+to+a+Production-Grade+Engineering+System;Where+Code+Meets+Scalability;Where+DevOps+Drives+Delivery;Where+Quality+is+Non-Negotiable"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:141E30,100:243B55&height=260&section=header&text=SSP%20MERN%20PROJECT&fontSize=48&fontColor=ffffff&animation=fadeIn&fontAlignY=35"/>
 
 <br>
 
-<img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" width="700"/>
-
-</div>
-
----
-
-# 🧠 ENGINEERING PHILOSOPHY
-
-<div align="center">
-
-<img src="https://readme-typing-svg.herokuapp.com?size=22&duration=2500&color=F7971E&center=true&vCenter=true&width=900&lines=Think+in+Systems;Design+for+Scale;Automate+Everything;Measure+Quality"/>
-
-</div>
-
-```text
-✔ Code is not just written → It is engineered
-✔ Features are not built → They are architected
-✔ Deployment is not manual → It is automated
-✔ Quality is not optional → It is enforced
-```
-
----
-
-# ⚙️ INTERNAL ENGINEERING WORKFLOW
-
-```text
-Developer → Git Commit
-        ↓
-GitHub Actions Pipeline
-        ↓
-Test Execution + Coverage
-        ↓
-SonarCloud Quality Gate
-        ↓
-Docker Image Build
-        ↓
-Container Registry Push
-        ↓
-AWS EC2 Deployment
-        ↓
-Live Application
-```
-
----
-
-# 🧪 QUALITY GATES (STRICT MODE)
-
-<div align="center">
-
-<img src="https://readme-typing-svg.herokuapp.com?size=22&duration=2000&color=00FF7F&center=true&vCenter=true&width=800&lines=No+Merge+Without+Tests;No+Deploy+Without+Quality;No+Release+Without+Validation"/>
-
-</div>
-
-- ✅ Minimum 80% coverage enforced  
-- ✅ Lint + test checks mandatory  
-- ✅ SonarCloud Quality Gate required  
-- ✅ CI must pass before merge  
-
----
-
-# 🚀 DEPLOYMENT STRATEGY (DEEP VIEW)
-
-```text
-Stage 1 → Build
-Stage 2 → Test
-Stage 3 → Analyze
-Stage 4 → Package (Docker)
-Stage 5 → Push (Registry)
-Stage 6 → Deploy (EC2)
-Stage 7 → Run Containers
-Stage 8 → Health Check
-```
-
----
-
-# 🌐 REAL-WORLD READINESS
-
-<div align="center">
-
-<img src="https://readme-typing-svg.herokuapp.com?size=22&duration=2500&color=00C9FF&center=true&vCenter=true&width=900&lines=Designed+for+Production;Built+for+Real+Users;Ready+for+Scaling;Structured+for+Teams"/>
-
-</div>
-
-✔ Microservice-ready structure  
-✔ Environment-based configs  
-✔ Easily extendable to Kubernetes  
-✔ CI/CD reusable pipelines  
-
----
-
-# 📊 VISUAL SIGNALS (ENGINEERING CONFIDENCE)
-
-<div align="center">
-
-<img src="https://img.shields.io/badge/Architecture-Clean-success?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/Code%20Quality-A+-blue?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/DevOps-Mature-orange?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/Deployment-Automated-green?style=for-the-badge"/>
-
-</div>
-
----
-
-# 🎯 RECRUITER IMPACT ZONE
-
-```text
-✔ Demonstrates Full Stack Capability
-✔ Shows DevOps Practical Knowledge
-✔ Proves CI/CD Pipeline Understanding
-✔ Reflects Production-Level Thinking
-✔ Highlights Code Quality Discipline
-```
-
----
-
-# 🧬 EXTENSIBILITY BLUEPRINT
-
-```text
-→ Add Authentication Layer (JWT / OAuth)
-→ Integrate Redis Caching
-→ Introduce API Gateway
-→ Move to Kubernetes (EKS)
-→ Add Monitoring Stack (Prometheus + Grafana)
-→ Implement Blue-Green Deployment
-```
-
----
-
-# 🎬 FINAL EXPERIENCE DROP
-
-<div align="center">
-
-<img src="https://readme-typing-svg.herokuapp.com?size=26&duration=2000&color=FF416C&center=true&vCenter=true&width=900&lines=From+Idea+→+Architecture+→+Code+→+Deployment;This+is+Engineering.;This+is+Discipline.;This+is+SSP."/>
+<img src="https://readme-typing-svg.herokuapp.com?size=30&duration=2000&color=00F5FF&center=true&vCenter=true&width=1000&lines=🚀+SSP+MERN+Project;Full+Stack+Engineering+Platform;DevOps+Driven+Architecture;Production-Ready+Application"/>
 
 <br>
 
-<img src="https://media.giphy.com/media/xT9IgzoKnwFNmISR8I/giphy.gif" width="500"/>
+<img src="https://readme-typing-svg.herokuapp.com?size=22&duration=2500&color=FFD700&center=true&vCenter=true&width=900&lines=React+%7C+Node.js+%7C+MongoDB+%7C+Docker;CI/CD+%7C+SonarCloud+%7C+AWS+Deployment;Scalable+%7C+Maintainable+%7C+Automated"/>
+
+<br><br>
+
+<img src="https://img.shields.io/badge/PROJECT-SSP%20MERN-blueviolet?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/STACK-MERN-success?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/CI/CD-ACTIVE-orange?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/DOCKERIZED-YES-blue?style=for-the-badge"/>
+
+<br><br>
+
+<img src="https://skillicons.dev/icons?i=react,nodejs,express,mongodb,docker,nginx,aws,github,linux" />
 
 </div>
 
 ---
 
-# 🏁 ⚡ LEGENDARY SIGNATURE FOOTER (FINAL FORM)
+# 🌟 OVERVIEW
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:000000,100:434343&height=220&section=footer&text=SSP%20ENGINEERING&fontSize=40&fontColor=ffffff&animation=fadeIn"/>
+<img src="https://readme-typing-svg.herokuapp.com?size=22&duration=2000&color=00FFAB&center=true&vCenter=true&width=900&lines=Production-Grade+MERN+Application;Built+with+DevOps+Best+Practices;Engineered+for+Scalability+and+Maintainability"/>
+
+</div>
+
+A **full-stack MERN monorepo system** integrating modern development and DevOps workflows:
+
+- Modular architecture  
+- Automated CI/CD pipelines  
+- Code quality enforcement (SonarCloud)  
+- Containerized deployment  
+
+---
+
+# 🔥 CORE FEATURES
+
+## 🎯 Application
+- Responsive React UI  
+- CRUD operations (Courses API)  
+- RESTful architecture  
+- Error handling & validation  
+
+## ⚙️ Backend
+- Express.js modular structure  
+- Mongoose schema validation  
+- Clean routing + controllers  
+- Health check endpoints  
+
+## 🐳 DevOps
+- Dockerized services  
+- Nginx frontend serving  
+- Multi-container orchestration  
+
+## 🚀 CI/CD
+- GitHub Actions pipeline  
+- SonarCloud integration  
+- Automated testing  
+- Docker build & deploy  
+
+---
+
+# 🧠 ARCHITECTURE
+
+```text
+Browser
+   ↓
+Nginx (Frontend - React)
+   ↓
+Node.js Backend (Express API)
+   ↓
+MongoDB Database
+```
+
+---
+
+# 🔄 REQUEST FLOW
+
+```text
+1. User loads frontend
+2. API call → /courses
+3. Backend validates request
+4. DB interaction via Mongoose
+5. Response → UI update
+```
+
+---
+
+# 🛠️ TECH STACK
+
+## 🎨 Frontend
+- React 17  
+- Tailwind CSS  
+- Axios  
+- React Testing Library  
+
+## ⚙️ Backend
+- Node.js 20  
+- Express.js  
+- Mongoose  
+- Jest  
+
+## 🧪 Quality
+- LCOV Coverage  
+- SonarCloud Analysis  
+
+## 🚀 DevOps
+- Docker & Docker Compose  
+- GitHub Actions  
+- AWS EC2  
+- Nginx  
+
+---
+
+# 📁 PROJECT STRUCTURE
+
+```text
+SSP_MERN_Project/
+├── backend/
+├── frontend/
+├── docs/
+├── .github/workflows/
+├── docker-compose.yml
+└── sonar-project.properties
+```
+
+---
+
+# 🚀 GETTING STARTED
+
+```bash
+git clone https://github.com/Jayakrishnasai/SSP_MERN_Project.git
+cd SSP_MERN_Project
+```
+
+---
+
+# 🐳 RUN PROJECT
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+# 🌐 ACCESS
+
+| Service   | URL |
+|----------|-----|
+| Frontend | http://localhost |
+| Backend  | http://localhost:3100/courses |
+| Health   | http://localhost:3100/health |
+
+---
+
+# 📡 API ENDPOINTS
+
+| Method | Endpoint        | Description |
+|--------|---------------|------------|
+| GET    | /courses      | Fetch all  |
+| POST   | /courses      | Create     |
+| PUT    | /courses/:id  | Update     |
+| DELETE | /courses/:id  | Delete     |
+
+---
+
+# 🧪 TESTING
+
+## Backend
+```bash
+cd backend
+npm test -- --runInBand
+```
+
+## Frontend
+```bash
+cd frontend
+npm test -- --coverage
+```
+
+✔ Coverage sent to SonarCloud  
+✔ Uses LCOV  
+
+---
+
+# ⚙️ CI/CD PIPELINE
+
+```text
+Code → Test → Coverage → Sonar Analysis → Docker Build → Deploy (EC2)
+```
+
+---
+
+# 📊 SONARCLOUD
+
+- Code quality checks  
+- Coverage enforcement ≥ 80%  
+- Security analysis  
+- Maintainability rating  
+
+---
+
+# ☁️ DEPLOYMENT
+
+```text
+1. Build Docker images
+2. Tag with commit SHA
+3. Push to registry
+4. SSH into EC2
+5. Pull images
+6. Restart containers
+```
+
+---
+
+# 🔒 SECURITY
+
+- No hardcoded secrets  
+- GitHub Secrets used  
+- MongoDB secured  
+- Environment configs  
+
+---
+
+# 🧬 FUTURE IMPROVEMENTS
+
+- JWT Authentication  
+- Kubernetes deployment  
+- Redis caching  
+- Monitoring stack (Prometheus + Grafana)  
+
+---
+
+# 🏆 QUALITY METRICS
+
+<div align="center">
+
+<img src="https://img.shields.io/badge/Build-Passing-success?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Coverage-80%25-brightgreen?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Quality-Sonar%20Verified-blue?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/Deployment-Automated-orange?style=for-the-badge"/>
+
+</div>
+
+---
+
+# 🏁 FINAL SIGNATURE
+
+<div align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:000000,100:434343&height=200&section=footer&text=SSP%20ENGINEERING&fontSize=38&fontColor=ffffff&animation=fadeIn"/>
 
 <br>
 
-<img src="https://readme-typing-svg.herokuapp.com?size=28&duration=2200&color=FFD700&center=true&vCenter=true&width=1000&lines=Perseverance+Defines+Us;Consistency+Builds+Us;Discipline+Drives+Us;Engineering+Elevates+Us"/>
+<img src="https://readme-typing-svg.herokuapp.com?size=26&duration=2000&color=FFD700&center=true&vCenter=true&width=900&lines=Perseverance+%7C+Consistency+%7C+Discipline;Engineering+Production-Grade+Systems"/>
 
 <br><br>
 
 <img src="https://img.shields.io/badge/Made%20with-❤️-ff0000?style=for-the-badge"/>
-<img src="https://img.shields.io/badge/Powered%20by-SSP-00F5FF?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/By-SSP-00F5FF?style=for-the-badge"/>
 <img src="https://img.shields.io/badge/MERN%20%2B%20DevOps-Elite-blueviolet?style=for-the-badge"/>
 
 <br><br>
 
-<img src="https://readme-typing-svg.herokuapp.com?size=22&duration=2000&color=00FFAB&center=true&vCenter=true&width=1000&lines=Code+Like+a+Developer;Think+Like+an+Architect;Deliver+Like+a+DevOps+Engineer"/>
-
-<br>
-
-<img src="https://media.giphy.com/media/3o7btPCcdNniyf0ArS/giphy.gif" width="140"/>
-
-<br><br>
-
-### 💙 **Made with ❤️ by SSP (Perseverance Software Training Institute)**
-
-<br>
-
-<img src="https://readme-typing-svg.herokuapp.com?size=20&duration=1800&color=AAAAAA&center=true&vCenter=true&width=800&lines=End+of+README...;But+Start+of+Engineering+Journey."/>
+### 💙 Made with ❤️ by SSP (Perseverance Software Training Institute)
 
 </div>
