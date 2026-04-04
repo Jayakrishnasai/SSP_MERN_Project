@@ -2,16 +2,16 @@ import React from 'react';
 import SectionTitle from '../layout/SectionTitle';
 import Card from '../shared/Card';
 
-const features = [
-  { id: 'industry-curriculum', title: 'Industry Curriculum', description: 'Stay ahead with modern tools and workflows used by top-tier global tech companies.', icon: 'IC' },
-  { id: 'live-mentorship', title: 'Live Mentorship', description: 'Direct access to experts through interactive live sessions and personalized office hours.', icon: 'LM' },
-  { id: 'project-based', title: 'Project-Based', description: 'Build a robust professional portfolio through end-to-end real-world development projects.', icon: 'PB' },
-  { id: 'placement-support', title: 'Placement Support', description: 'Advanced resume building, mock interviews, and direct access to global hiring partners.', icon: 'PS' },
-  { id: 'flexible-learning', title: 'Flexible Learning', description: 'Balance your education with work through advanced part-time and online learning options.', icon: 'FL' },
-  { id: 'global-network', title: 'Global Network', description: 'Join a massive community of thousands of alumni working across the globe.', icon: 'GN' },
-];
-
 const FeatureGrid = () => {
+  const features = [
+    { title: 'Industry Curriculum', description: 'Stay ahead with modern tools and workflows used by top-tier global tech companies.', icon: '🎯' },
+    { title: 'Live Mentorship', description: 'Direct access to experts through interactive live sessions and personalized office hours.', icon: '👨‍💻' },
+    { title: 'Project-Based', description: 'Build a robust professional portfolio through end-to-end real-world development projects.', icon: '🚀' },
+    { title: 'Placement Support', description: 'Advanced resume building, mock interviews, and direct access to global hiring partners.', icon: '💼' },
+    { title: 'Flexible Learning', description: 'Balance your education with work through advanced part-time and online learning options.', icon: '🕒' },
+    { title: 'Global Network', description: 'Join a massive community of thousands of alumni working across the globe.', icon: '🌐' },
+  ];
+
   return (
     <section className="py-20 bg-gray-50 dark:bg-navy-900 transition-colors duration-500 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-32 h-full bg-blue-600/5 z-0 transition-all pointer-events-none skew-x-12"></div>
@@ -23,8 +23,8 @@ const FeatureGrid = () => {
           centered
         />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature) => (
-            <Card key={feature.id} className="!p-10 border-none !bg-white dark:!bg-navy-800 shadow-2xl group hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-700 rounded-[2rem] relative overflow-hidden">
+          {features.map((feature, idx) => (
+            <Card key={idx} className="!p-10 border-none !bg-white dark:!bg-navy-800 shadow-2xl group hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-700 rounded-[2rem] relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-gray-50 dark:bg-navy-900 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
               <div className="text-4xl mb-8 transform group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700 relative z-10">
                 {feature.icon}

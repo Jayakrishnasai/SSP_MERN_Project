@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 
 const Card = ({ children, className = '', hover = true }) => {
@@ -9,12 +8,6 @@ const Card = ({ children, className = '', hover = true }) => {
       {children}
     </div>
   );
-};
-
-Card.propTypes = {
-  children: PropTypes.node,
-  className: PropTypes.string,
-  hover: PropTypes.bool,
 };
 
 export default Card;

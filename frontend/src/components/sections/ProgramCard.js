@@ -12,16 +12,16 @@ const ClockIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
 );
 
-const programs = [
-  { id: 'cloud-devops', name: 'Cloud & DevOps', duration: '12 Weeks', tag: 'Trending', description: 'Master AWS, Azure, Docker, Kubernetes and CI/CD pipelines with real-world infrastructure.' },
-  { id: 'ai-data-science', name: 'AI & Data Science', duration: '16 Weeks', tag: 'High Growth', description: 'Comprehensive training in Machine Learning, Python, and Predictive Analytics for data-driven decisions.' },
-  { id: 'python-engineering', name: 'Python Engineering', duration: '8 Weeks', tag: 'Foundation', description: 'Advanced Python with Django, high-performance data structures and API development.' },
-  { id: 'linux-administration', name: 'Linux Administration', duration: '6 Weeks', tag: 'Core', description: 'Robust foundation in system administration, Bash scripting, and enterprise-grade security.' },
-  { id: 'database-architecture', name: 'Database Architecture', duration: '8 Weeks', tag: 'Advanced', description: 'SQL, NoSQL, and high-availability systems for distributed large-scale data storage.' },
-  { id: 'web-engineering', name: 'Web Engineering', duration: '12 Weeks', tag: 'Popular', description: 'Modern full-stack development with React, Node.js, and TypeScript for the modern web.' },
-];
-
 const ProgramCard = () => {
+  const programs = [
+    { name: 'Cloud & DevOps', duration: '12 Weeks', tag: 'Trending', description: 'Master AWS, Azure, Docker, Kubernetes and CI/CD pipelines with real-world infrastructure.', color: 'blue' },
+    { name: 'AI & Data Science', duration: '16 Weeks', tag: 'High Growth', description: 'Comprehensive training in Machine Learning, Python, and Predictive Analytics for data-driven decisions.', color: 'purple' },
+    { name: 'Python Engineering', duration: '8 Weeks', tag: 'Foundation', description: 'Advanced Python with Django, high-performance data structures and API development.', color: 'yellow' },
+    { name: 'Linux Administration', duration: '6 Weeks', tag: 'Core', description: 'Robust foundation in system administration, Bash scripting, and enterprise-grade security.', color: 'green' },
+    { name: 'Database Architecture', duration: '8 Weeks', tag: 'Advanced', description: 'SQL, NoSQL, and high-availability systems for distributed large-scale data storage.', color: 'red' },
+    { name: 'Web Engineering', duration: '12 Weeks', tag: 'Popular', description: 'Modern full-stack development with React, Node.js, and TypeScript for the modern web.', color: 'cyan' },
+  ];
+
   return (
     <section id="programs" className="py-20 bg-white dark:bg-navy-900 transition-colors duration-500 overflow-hidden relative">
       <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-gray-100 dark:via-navy-800/30 to-transparent"></div>
@@ -33,11 +33,11 @@ const ProgramCard = () => {
           centered
         />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {programs.map((program) => (
-            <Card key={program.id} className="group !p-0 border border-gray-100/50 dark:border-navy-800 hover:border-accent/40 dark:hover:border-accent/40 relative overflow-hidden bg-white dark:bg-navy-800 shadow-2xl shadow-gray-200/50 dark:shadow-none hover:-translate-y-2 transition-all duration-700">
+          {programs.map((program, idx) => (
+            <Card key={idx} className="group !p-0 border border-gray-100/50 dark:border-navy-800 hover:border-accent/40 dark:hover:border-accent/40 relative overflow-hidden bg-white dark:bg-navy-800 shadow-2xl shadow-gray-200/50 dark:shadow-none hover:-translate-y-2 transition-all duration-700">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-navy-900 flex items-center justify-center transform group-hover:-rotate-6 transition-transform shadow-xl">
+                  <div className={`w-10 h-10 rounded-xl bg-gray-50 dark:bg-navy-900 flex items-center justify-center transform group-hover:-rotate-6 transition-transform shadow-xl`}>
                     <div className="w-4 h-4 rounded-lg bg-accent/20 border-2 border-accent"></div>
                   </div>
                   <Badge className="!bg-blue-100 !text-blue-600 dark:!bg-accent/10 dark:!text-accent !border-none !px-3 !py-1 !text-[7px] font-black tracking-widest uppercase">{program.tag}</Badge>

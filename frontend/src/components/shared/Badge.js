@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 
 const Badge = ({ children, className = '' }) => {
@@ -7,11 +6,6 @@ const Badge = ({ children, className = '' }) => {
       {children}
     </span>
   );
-};
-
-Badge.propTypes = {
-  children: PropTypes.node,
-  className: PropTypes.string,
 };
 
 export default Badge;

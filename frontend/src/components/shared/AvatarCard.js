@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 
 const AvatarCard = ({ name, role, image, description, className = '' }) => {
@@ -17,14 +16,6 @@ const AvatarCard = ({ name, role, image, description, className = '' }) => {
       {description && <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed max-w-xs">{description}</p>}
     </div>
   );
-};
-
-AvatarCard.propTypes = {
-  name: PropTypes.string.isRequired,
-  role: PropTypes.string.isRequired,
-  image: PropTypes.string,
-  description: PropTypes.string,
-  className: PropTypes.string,
 };
 
 export default AvatarCard;
