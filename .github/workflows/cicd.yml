@@ -35,7 +35,7 @@ jobs:
 
       - name: SonarQube Quality Gate Check
         # continue-on-error: true # Uncomment if you want to deploy even if quality gate fails
-        uses: sonarsource/sonarqube-quality-gate-action@master
+        uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -47,7 +47,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: SSH and Deploy
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}

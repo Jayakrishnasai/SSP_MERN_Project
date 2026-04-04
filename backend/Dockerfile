@@ -12,5 +12,8 @@ RUN npm install
 # Copy the rest of the application code to the working directory
 COPY . .
 
+# Run as non-root user for security
+USER node
+
 # Specify the command to run the application
 CMD ["node", "index.js"]
