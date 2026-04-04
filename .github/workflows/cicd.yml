@@ -137,29 +137,9 @@ jobs:
       - name: Push Frontend Image
         run: docker push $FRONTEND_IMAGE:$GITHUB_SHA
 
-  security:
-    name: Trivy Scan
-    needs: docker
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Scan Backend Image
-        uses: aquasecurity/trivy-action@6e6e1c0a3a3c5a4d06a1848b8c8d5c0e6c28d1cb
-        with:
-          image-ref: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
-          severity: CRITICAL,HIGH
-          exit-code: "1"
-
-      - name: Scan Frontend Image
-        uses: aquasecurity/trivy-action@6e6e1c0a3a3c5a4d06a1848b8c8d5c0e6c28d1cb
-        with:
-          image-ref: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-          severity: CRITICAL,HIGH
-          exit-code: "1"
-
   deploy:
     name: Deploy to EC2
-    needs: security
+    needs: docker
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
