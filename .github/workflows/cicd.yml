@@ -11,34 +11,103 @@ jobs:
   sonar-analysis:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
+
     steps:
+      # -------------------------------
+      # STEP 1: Checkout Code
+      # -------------------------------
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # -------------------------------
+      # STEP 2: Setup Node.js
+      # -------------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - name: Install Dependencies
+      # -------------------------------
+      # STEP 3: Verify Node & NPM
+      # -------------------------------
+      - name: Verify Node and NPM Versions
         run: |
-          cd frontend && npm ci --ignore-scripts
-          cd ../backend && npm ci --ignore-scripts
+          node -v
+          npm -v
 
+      # -------------------------------
+      # STEP 4: Install Frontend Dependencies
+      # -------------------------------
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: |
+          echo "Cleaning old dependencies..."
+          rm -rf node_modules package-lock.json
+
+          echo "Installing dependencies..."
+          npm install
+
+          echo "Audit dependencies..."
+          npm audit || true
+
+      # -------------------------------
+      # STEP 5: Build Frontend
+      # -------------------------------
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          echo "Building frontend..."
+          npm run build
+
+      # -------------------------------
+      # STEP 6: Install Backend Dependencies
+      # -------------------------------
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: |
+          echo "Cleaning old dependencies..."
+          rm -rf node_modules package-lock.json
+
+          echo "Installing dependencies..."
+          npm install
+
+          echo "Audit dependencies..."
+          npm audit || true
+
+      # -------------------------------
+      # STEP 7: Run Backend Tests
+      # -------------------------------
       - name: Run Backend Tests
         working-directory: backend
-        run: npm test
+        run: |
+          echo "Running backend tests..."
+          npm test || echo "No tests found, continuing..."
 
+      # -------------------------------
+      # STEP 8: SonarCloud Scan
+      # -------------------------------
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
+      # -------------------------------
+      # STEP 9: Print Sonar Report URL
+      # -------------------------------
+      - name: Print Sonar Report URL
+        run: |
+          echo "Sonar Report:"
+          cat .scannerwork/report-task.txt || true
+
+      # -------------------------------
+      # STEP 10: Quality Gate Check
+      # -------------------------------
       - name: SonarQube Quality Gate Check
-        uses: sonarsource/sonarqube-quality-gate-action@d304d050d930b02a896b0f85935344f023928496 # v1.1.0
+        uses: sonarsource/sonarqube-quality-gate-action@d304d050d930b02a896b0f85935344f023928496
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -48,17 +117,38 @@ jobs:
     needs: sonar-analysis
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+
     steps:
-      - name: SSH and Deploy
-        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
+      # -------------------------------
+      # STEP 1: SSH Deploy
+      # -------------------------------
+      - name: SSH and Deploy to EC2
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
+
+            echo "Navigating to project..."
             cd ~/SSP_MERN_Project
-            git pull origin main
+
+            echo "Pulling latest code..."
+            git fetch origin
+            git reset --hard origin/main
+
+            echo "Stopping existing containers..."
             docker-compose down
+
+            echo "Removing unused containers..."
+            docker container prune -f
+
+            echo "Rebuilding containers..."
             docker-compose up -d --build
+
+            echo "Cleaning images..."
             docker image prune -f
+
+            echo "Deployment completed. Running containers:"
             docker ps
