@@ -14,9 +14,9 @@ const ArrowRight = () => (
 );
 
 const SuccessStoryGrid = ({ stories = [
-    { title: 'Cloud Architect Success', student: 'E. SaiTeja', details: 'Transitioned to a Cloud Architect role, managing complex AWS deployments for a major tech firm.', image: '/images/SaiTeja.jpg' },
-    { title: 'DevOps Mastery', student: 'Jaya Krishna Sai', details: 'Mastered modern DevOps practices, transitioning from system admin to complex CI/CD pipelines.', image: "/images/jaya_krishna.jpg" },
-    { title: 'Full Stack Excellence', student: 'Jaswanth', details: 'Built a solid foundation in web tech and now leading development at a software house.', image: '/images/jaswanth.jpg' },
+    { id: 'cloud-architect-success', title: 'Cloud Architect Success', student: 'E. SaiTeja', details: 'Transitioned to a Cloud Architect role, managing complex AWS deployments for a major tech firm.', image: '/images/SaiTeja.jpg' },
+    { id: 'devops-mastery', title: 'DevOps Mastery', student: 'Jaya Krishna Sai', details: 'Mastered modern DevOps practices, transitioning from system admin to complex CI/CD pipelines.', image: "/images/jaya_krishna.jpg" },
+    { id: 'full-stack-excellence', title: 'Full Stack Excellence', student: 'Jaswanth', details: 'Built a solid foundation in web tech and now leading development at a software house.', image: '/images/jaswanth.jpg' },
   ] }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -74,7 +74,7 @@ const SuccessStoryGrid = ({ stories = [
               style={{ transform: `translateX(-${activeIndex * 100}%)` }}
             >
               {stories.map((story, idx) => (
-                <div key={idx} className="w-full flex-shrink-0 px-4">
+                <div key={story.id} className="w-full flex-shrink-0 px-4">
                   <div className={`group relative bg-gray-50 dark:bg-navy-800 rounded-[2.5rem] shadow-2xl overflow-hidden transition-all duration-700 p-10 md:p-16 text-center ${activeIndex === idx ? 'scale-100 opacity-100' : 'scale-95 opacity-40 blur-[2px]'}`}>
                     
                     {/* Centered Avatar UI Unified with rest of site */}
@@ -121,9 +121,9 @@ const SuccessStoryGrid = ({ stories = [
 
           {/* Pagination Indicators */}
           <div className="flex justify-center mt-12 space-x-3">
-            {stories.map((_, i) => (
+            {stories.map((story, i) => (
               <button
-                key={i}
+                key={story.id}
                 onClick={() => setActiveIndex(i)}
                 className={`transition-all duration-500 rounded-full ${
                   activeIndex === i ? 'w-10 h-1.5 bg-accent' : 'w-2 h-1.5 bg-gray-200 dark:bg-navy-800 hover:bg-accent/40'
@@ -142,6 +142,7 @@ SuccessStoryGrid.propTypes = {
   stories: PropTypes.arrayOf(
     PropTypes.shape({
       title: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
       student: PropTypes.string.isRequired,
       details: PropTypes.string.isRequired,
       image: PropTypes.string.isRequired,

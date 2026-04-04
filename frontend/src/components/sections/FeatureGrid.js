@@ -4,12 +4,48 @@ import Card from '../shared/Card';
 
 const FeatureGrid = () => {
   const features = [
-    { title: 'Industry Curriculum', description: 'Stay ahead with modern tools and workflows used by top-tier global tech companies.', icon: '🎯' },
-    { title: 'Live Mentorship', description: 'Direct access to experts through interactive live sessions and personalized office hours.', icon: '👨‍💻' },
-    { title: 'Project-Based', description: 'Build a robust professional portfolio through end-to-end real-world development projects.', icon: '🚀' },
-    { title: 'Placement Support', description: 'Advanced resume building, mock interviews, and direct access to global hiring partners.', icon: '💼' },
-    { title: 'Flexible Learning', description: 'Balance your education with work through advanced part-time and online learning options.', icon: '🕒' },
-    { title: 'Global Network', description: 'Join a massive community of thousands of alumni working across the globe.', icon: '🌐' },
+    {
+      id: 'industry-curriculum',
+      title: 'Industry Curriculum',
+      description:
+        'Stay ahead with modern tools and workflows used by top-tier global tech companies.',
+      icon: 'Target',
+    },
+    {
+      id: 'live-mentorship',
+      title: 'Live Mentorship',
+      description:
+        'Direct access to experts through interactive live sessions and personalized office hours.',
+      icon: 'Mentor',
+    },
+    {
+      id: 'project-based',
+      title: 'Project-Based',
+      description:
+        'Build a robust professional portfolio through end-to-end real-world development projects.',
+      icon: 'Launch',
+    },
+    {
+      id: 'placement-support',
+      title: 'Placement Support',
+      description:
+        'Advanced resume building, mock interviews, and direct access to global hiring partners.',
+      icon: 'Career',
+    },
+    {
+      id: 'flexible-learning',
+      title: 'Flexible Learning',
+      description:
+        'Balance your education with work through advanced part-time and online learning options.',
+      icon: 'Flexible',
+    },
+    {
+      id: 'global-network',
+      title: 'Global Network',
+      description:
+        'Join a massive community of thousands of alumni working across the globe.',
+      icon: 'Global',
+    },
   ];
 
   return (
@@ -23,14 +59,21 @@ const FeatureGrid = () => {
           centered
         />
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, idx) => (
-            <Card key={idx} className="!p-10 border-none !bg-white dark:!bg-navy-800 shadow-2xl group hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-700 rounded-[2rem] relative overflow-hidden">
+          {features.map((feature) => (
+            <Card
+              key={feature.id}
+              className="!p-10 border-none !bg-white dark:!bg-navy-800 shadow-2xl group hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-700 rounded-[2rem] relative overflow-hidden"
+            >
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-gray-50 dark:bg-navy-900 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-              <div className="text-4xl mb-8 transform group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700 relative z-10">
+              <div className="text-2xl font-black uppercase tracking-[0.2em] text-blue-600 mb-8 relative z-10">
                 {feature.icon}
               </div>
-              <h4 className="text-xl font-black mb-4 text-navy-900 dark:text-white tracking-tighter leading-tight relative z-10 group-hover:text-blue-600 dark:group-hover:text-accent transition-colors">{feature.title}</h4>
-              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium text-sm relative z-10 group-hover:opacity-100 opacity-80 transition-opacity">{feature.description}</p>
+              <h4 className="text-xl font-black mb-4 text-navy-900 dark:text-white tracking-tighter leading-tight relative z-10 group-hover:text-blue-600 dark:group-hover:text-accent transition-colors">
+                {feature.title}
+              </h4>
+              <p className="text-gray-500 dark:text-gray-400 leading-relaxed font-medium text-sm relative z-10 group-hover:opacity-100 opacity-80 transition-opacity">
+                {feature.description}
+              </p>
             </Card>
           ))}
         </div>

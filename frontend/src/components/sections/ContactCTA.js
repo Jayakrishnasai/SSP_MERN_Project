@@ -97,6 +97,7 @@ const ContactCTA = ({ tasks, currentTask, handleChange, handleSubmit, handleUpda
                         >
                           <div className="flex items-center space-x-4">
                             <button
+                              type="button"
                               onClick={() => handleUpdate(task._id)}
                               aria-label={task.completed ? "Mark as Incomplete" : "Mark as Complete"}
                               className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all transform hover:scale-110 ${
@@ -114,6 +115,7 @@ const ContactCTA = ({ tasks, currentTask, handleChange, handleSubmit, handleUpda
                             </span>
                           </div>
                           <button
+                            type="button"
                             onClick={() => handleDelete(task._id)}
                             aria-label="Delete Interest"
                             className="text-white/10 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-all hover:bg-red-500/10 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-red-500"

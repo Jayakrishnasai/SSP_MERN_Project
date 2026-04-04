@@ -1,113 +1,123 @@
-const Task = require("../models/task");
+const mongoose = require("mongoose");
 const express = require("express");
+
+const Task = require("../models/task");
+
 const router = express.Router();
 
-/**
- * Validate + sanitize input (no mass assignment)
- */
-function sanitizeTaskInput(body) {
-    if (!body || typeof body !== "object") {
-        throw new TypeError("Invalid request body");
+function createHttpError(statusCode, message) {
+    const error = new TypeError(message);
+    error.statusCode = statusCode;
+    return error;
+}
+
+function sanitizeTaskInput(body, options = {}) {
+    const { requireTask = false } = options;
+
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+        throw createHttpError(400, "Invalid request body");
     }
 
     const sanitized = {};
 
-    // Validate "task"
     if (Object.hasOwn(body, "task")) {
-        if (typeof body.task !== "string" || body.task.trim() === "") {
-            throw new TypeError("Invalid 'task' field");
+        if (typeof body.task !== "string") {
+            throw createHttpError(400, "The task field must be a string");
         }
-        sanitized.task = body.task.trim();
+
+        const task = body.task.trim();
+
+        if (!task) {
+            throw createHttpError(400, "The task field cannot be empty");
+        }
+
+        if (task.length > 120) {
+            throw createHttpError(400, "The task field must be 120 characters or fewer");
+        }
+
+        sanitized.task = task;
+    } else if (requireTask) {
+        throw createHttpError(400, "The task field is required");
     }
 
-    // Validate "completed"
     if (Object.hasOwn(body, "completed")) {
         if (typeof body.completed !== "boolean") {
-            throw new TypeError("Invalid 'completed' field");
+            throw createHttpError(400, "The completed field must be a boolean");
         }
+
         sanitized.completed = body.completed;
     }
 
     return sanitized;
 }
 
-/**
- * CREATE Task
- */
-router.post("/", async (req, res) => {
+function validateObjectId(id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw createHttpError(400, "Invalid task id");
+    }
+}
+
+router.post("/", async (req, res, next) => {
     try {
-        // Compliant Solution: Destructure ONLY permitted fields (S4684)
-        const { task, completed } = req.body;
-        
-        // Pass sanitized fields explicitly to constructor
-        const newTask = new Task({
-            task: typeof task === "string" ? task.trim() : "",
-            completed: typeof completed === "boolean" ? completed : false
+        const payload = sanitizeTaskInput(req.body, { requireTask: true });
+        const newTask = await Task.create({
+            task: payload.task,
+            completed: payload.completed ?? false,
         });
 
-        await newTask.save();
         return res.status(201).json(newTask);
     } catch (error) {
-        return res.status(400).json({ error: error.message });
+        return next(error);
     }
 });
 
-/**
- * GET all tasks
- */
-router.get("/", async (req, res) => {
+router.get("/", async (_req, res, next) => {
     try {
-        const tasks = await Task.find().lean();
+        const tasks = await Task.find().sort({ createdAt: -1 }).lean();
         return res.status(200).json(tasks);
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        return next(error);
     }
 });
 
-/**
- * UPDATE Task
- */
-router.put("/:id", async (req, res) => {
+router.put("/:id", async (req, res, next) => {
     try {
-        const existingTask = await Task.findById(req.params.id);
+        validateObjectId(req.params.id);
 
-        if (!existingTask) {
-            return res.status(404).json({ message: "Task not found" });
+        const payload = sanitizeTaskInput(req.body);
+
+        if (Object.keys(payload).length === 0) {
+            throw createHttpError(400, "At least one allowed field must be provided");
         }
 
-        // Compliant Solution: Destructure ONLY permitted fields (S4684)
-        const { task, completed } = req.body;
+        const updatedTask = await Task.findByIdAndUpdate(req.params.id, payload, {
+            new: true,
+            runValidators: true,
+        });
 
-        // Explicitly update only allowed fields
-        if (typeof task === "string" && task.trim() !== "") {
-            existingTask.task = task.trim();
+        if (!updatedTask) {
+            throw createHttpError(404, "Task not found");
         }
 
-        if (typeof completed === "boolean") {
-            existingTask.completed = completed;
-        }
-
-        await existingTask.save();
-        return res.status(200).json(existingTask);
+        return res.status(200).json(updatedTask);
     } catch (error) {
-        return res.status(400).json({ error: error.message });
+        return next(error);
     }
 });
 
-/**
- * DELETE Task
- */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req, res, next) => {
     try {
-        const task = await Task.findByIdAndDelete(req.params.id);
+        validateObjectId(req.params.id);
 
-        if (!task) {
-            return res.status(404).json({ message: "Task not found" });
+        const deletedTask = await Task.findByIdAndDelete(req.params.id);
+
+        if (!deletedTask) {
+            throw createHttpError(404, "Task not found");
         }
 
-        return res.status(200).json(task);
+        return res.status(200).json({ message: "Task deleted successfully" });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        return next(error);
     }
 });
 

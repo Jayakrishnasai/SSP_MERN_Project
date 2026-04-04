@@ -1,70 +1,106 @@
-import { Component } from "react";
+import { useEffect, useState } from "react";
+
 import {
     addTask,
-    getTasks,
-    updateTask, 
     deleteTask,
+    getTasks,
+    updateTask,
 } from "./services/taskServices";
 
-class courses extends Component {
-    state = { tasks: [], currentTask: "" };
+function useCourses() {
+    const [tasks, setTasks] = useState([]);
+    const [currentTask, setCurrentTask] = useState("");
 
-    async componentDidMount() {
-        try {
-            const { data } = await getTasks();
-            this.setState({ tasks: data });
-        } catch (error) {
-            console.error("Failed to fetch tasks:", error);
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadTasks() {
+            try {
+                const { data } = await getTasks();
+
+                if (isMounted) {
+                    setTasks(Array.isArray(data) ? data : []);
+                }
+            } catch (error) {
+                console.error("Failed to fetch tasks:", error);
+            }
         }
-    }
 
-    handleChange = ({ currentTarget: input }) => {
-        this.setState({ currentTask: input.value });
+        loadTasks();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const handleChange = ({ currentTarget: input }) => {
+        setCurrentTask(input.value);
     };
 
-    handleSubmit = async (e) => {
-        e.preventDefault();
-        const originalTasks = this.state.tasks;
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        const nextTask = currentTask.trim();
+
+        if (!nextTask) {
+            return;
+        }
+
         try {
-            const { data } = await addTask({ task: this.state.currentTask });
-            const tasks = [...originalTasks];
-            tasks.push(data);
-            this.setState({ tasks, currentTask: "" });
+            const { data } = await addTask({ task: nextTask });
+            setTasks((previousTasks) => [data, ...previousTasks]);
+            setCurrentTask("");
         } catch (error) {
             console.error("Failed to add task:", error);
         }
     };
 
-    handleUpdate = async (currentTask) => {
-        const originalTasks = this.state.tasks;
+    const handleUpdate = async (taskId) => {
+        const previousTasks = tasks;
+        const targetTask = previousTasks.find((task) => task._id === taskId);
+
+        if (!targetTask) {
+            return;
+        }
+
+        const updatedTasks = previousTasks.map((task) =>
+            task._id === taskId
+                ? { ...task, completed: !task.completed }
+                : task
+        );
+
+        setTasks(updatedTasks);
+
         try {
-            const tasks = [...originalTasks];
-            const index = tasks.findIndex((task) => task._id === currentTask);
-            tasks[index] = { ...tasks[index] };
-            tasks[index].completed = !tasks[index].completed;
-            this.setState({ tasks });
-            await updateTask(currentTask, {
-                completed: tasks[index].completed,
+            await updateTask(taskId, {
+                completed: !targetTask.completed,
             });
         } catch (error) {
-            this.setState({ tasks: originalTasks });
+            setTasks(previousTasks);
             console.error("Failed to update task:", error);
         }
     };
 
-    handleDelete = async (currentTask) => {
-        const originalTasks = this.state.tasks;
+    const handleDelete = async (taskId) => {
+        const previousTasks = tasks;
+        setTasks(previousTasks.filter((task) => task._id !== taskId));
+
         try {
-            const tasks = originalTasks.filter(
-                (task) => task._id !== currentTask
-            );
-            this.setState({ tasks });
-            await deleteTask(currentTask);
+            await deleteTask(taskId);
         } catch (error) {
-            this.setState({ tasks: originalTasks });
+            setTasks(previousTasks);
             console.error("Failed to delete task:", error);
         }
     };
+
+    return {
+        tasks,
+        currentTask,
+        handleChange,
+        handleSubmit,
+        handleUpdate,
+        handleDelete,
+    };
 }
 
-export default courses;
+export default useCourses;
