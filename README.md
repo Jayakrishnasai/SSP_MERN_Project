@@ -37,13 +37,13 @@
 Computer Science Engineering Graduate
 Currently working with SSP GLOBAL – Software Training Institute & Software Solutions
 
-Focused on DevOps Engineering, Cloud Infrastructure, and Full Stack Development
+✔ Implementing automated CI/CD pipelines for production workflows  
+✔ Designing and deploying containerized, production-grade applications  
+✔ Deploying and managing cloud infrastructure on AWS  
+✔ Developing end-to-end MERN applications  
+✔ Designing scalable, production-ready systems
+```
 
-✔ Designing CI/CD pipelines using GitHub Actions
-✔ Containerizing applications with Docker
-✔ Deploying scalable applications on AWS (EC2)
-✔ Building end-to-end MERN applications
-✔ Developing production-ready, scalable systems
 ---
 
 # 🌟 OVERVIEW
