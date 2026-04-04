@@ -1,22 +1,18 @@
 FROM node:20-alpine
 
-# Set the working directory inside the container to /usr/src/app
 WORKDIR /usr/src/app
+ENV NODE_ENV=production
 
-# Copy package.json and package-lock.json (if available) to the working directory
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
-# Install the dependencies specified in package.json
-RUN npm ci --ignore-scripts
+RUN npm ci --omit=dev --ignore-scripts \
+    && npm cache clean --force
 
-# Copy only application source files (not secrets or config)
 COPY routes ./routes
 COPY models ./models
 COPY db.js ./
 COPY index.js ./
 
-# Run as non-root user for security
 USER node
 
-# Specify the command to run the application
 CMD ["node", "index.js"]

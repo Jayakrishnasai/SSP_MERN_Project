@@ -1,50 +1,97 @@
 services:
-  # 🍃 MongoDB Service
   mongodb:
     image: mongo:4.4.6
     container_name: mongodb-server
-    restart: always
+    restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "echo 'db.runCommand({ ping: 1 }).ok' | mongo localhost:27017/test --quiet"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     networks:
       - ssp-network
 
-  # ⚙️ Backend API Service
   backend-api:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: backend-api
-    restart: always
+    restart: unless-stopped
+    init: true
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     environment:
-      - PORT=3100
-      - DB_CONN_STR=mongodb://admin:password123@mongodb:27017/perseverance?authSource=admin
-      - DB_USERNAME=admin
-      - DB_PASSWORD=password123
-      - USE_DB_AUTH=true
+      PORT: 3100
+      DB_CONN_STR: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/perseverance?authSource=admin
+      DB_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      DB_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      USE_DB_AUTH: "true"
     ports:
       - "3100:3100"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"require('http').get('http://127.0.0.1:3100/courses', (res) => process.exit(res.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))\""
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     networks:
       - ssp-network
 
-  # 🌐 Frontend Web App Service
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: frontend-webapp
-    restart: always
+    restart: unless-stopped
+    init: true
     depends_on:
-      - backend-api
+      backend-api:
+        condition: service_healthy
     ports:
       - "80:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --spider --quiet http://127.0.0.1:8080 || exit 1"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     networks:
       - ssp-network
 
