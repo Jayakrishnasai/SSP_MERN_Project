@@ -8,6 +8,14 @@
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
+  "jest": {
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!coverage/**",
+      "!node_modules/**",
+      "!tests/**"
+    ]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
