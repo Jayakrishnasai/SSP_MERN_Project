@@ -34,16 +34,16 @@
 </div>
 
 ```text
-Final-Year Computer Science Engineer
-Specializing in DevOps + Cloud + Full Stack Development
+Computer Science Engineering Graduate
+Currently working with SSP GLOBAL – Software Training Institute & Software Solutions
 
-✔ CI/CD Pipelines (GitHub Actions)
-✔ Docker & Containerization
-✔ AWS Deployment (EC2)
-✔ Backend + Frontend Integration
-✔ Production-Ready System Design
-```
+Focused on DevOps Engineering, Cloud Infrastructure, and Full Stack Development
 
+✔ Designing CI/CD pipelines using GitHub Actions
+✔ Containerizing applications with Docker
+✔ Deploying scalable applications on AWS (EC2)
+✔ Building end-to-end MERN applications
+✔ Developing production-ready, scalable systems
 ---
 
 # 🌟 OVERVIEW
