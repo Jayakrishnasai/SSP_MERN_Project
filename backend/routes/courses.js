@@ -46,7 +46,7 @@ function sanitizeTaskInput(body, options = {}) {
 
     const sanitized = {};
 
-    if (Object.prototype.hasOwnProperty.call(body, "task")) {
+    if (Object.hasOwn(body, "task")) {
         if (typeof body.task !== "string") {
             throw new HttpError(
                 HTTP_STATUS.BAD_REQUEST,
@@ -78,7 +78,7 @@ function sanitizeTaskInput(body, options = {}) {
         );
     }
 
-    if (Object.prototype.hasOwnProperty.call(body, "completed")) {
+    if (Object.hasOwn(body, "completed")) {
         if (typeof body.completed !== "boolean") {
             throw new HttpError(
                 HTTP_STATUS.BAD_REQUEST,

@@ -24,9 +24,7 @@ services:
       - ssp-network
 
   backend-api:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ${BACKEND_IMAGE_TAG:-jayakrishnasai/ssp-backend:latest}
     container_name: backend-api
     restart: unless-stopped
     init: true
@@ -62,9 +60,7 @@ services:
       - ssp-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ${FRONTEND_IMAGE_TAG:-jayakrishnasai/ssp-frontend:latest}
     container_name: frontend-webapp
     restart: unless-stopped
     init: true

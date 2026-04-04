@@ -1,7 +1,5 @@
-try {
+if (process.env.NODE_ENV !== "production") {
     require("dotenv").config();
-} catch (_error) {
-    // dotenv is optional in production containers where env vars are injected externally.
 }
 
 const cors = require("cors");
