@@ -13,29 +13,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0 # Full history needed for SonarCloud analysis
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
           node-version: '20'
 
       - name: Install Dependencies
         run: |
-          cd frontend && npm install
-          cd ../backend && npm install
+          cd frontend && npm install --ignore-scripts
+          cd ../backend && npm install --ignore-scripts
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v3
+        uses: SonarSource/sonarqube-scan-action@2500896589ef8f7247069a56136f8dc177c27ccf # v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
       - name: SonarQube Quality Gate Check
         # continue-on-error: true # Uncomment if you want to deploy even if quality gate fails
-        uses: sonarsource/sonarqube-quality-gate-action@v1.1.0
+        uses: sonarsource/sonarqube-quality-gate-action@d304d050d930b02a896b0f85935344f023928496 # v1.1.0
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -47,7 +47,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: SSH and Deploy
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}

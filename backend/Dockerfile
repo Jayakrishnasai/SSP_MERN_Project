@@ -7,7 +7,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install the dependencies specified in package.json
-RUN npm install
+RUN npm install --ignore-scripts
 
 # Copy the rest of the application code to the working directory
 COPY . .
