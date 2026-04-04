@@ -13,17 +13,17 @@ connection();
 app.use(express.json());
 
 // Restrict CORS to known origins (S5122)
-const allowedOrigins = [
+const allowedOrigins = new Set([
     process.env.FRONTEND_URL || "http://localhost",
     "http://localhost:3000",
     "http://localhost:80"
-];
+]);
 
 app.use(cors({
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) {
+        if (allowedOrigins.has(origin)) {
             return callback(null, true);
         }
         return callback(new Error("Not allowed by CORS"));

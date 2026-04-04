@@ -7,10 +7,13 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install the dependencies specified in package.json
-RUN npm install --ignore-scripts
+RUN npm ci --ignore-scripts
 
-# Copy the rest of the application code to the working directory
-COPY . .
+# Copy only application source files (not secrets or config)
+COPY routes ./routes
+COPY models ./models
+COPY db.js ./
+COPY index.js ./
 
 # Run as non-root user for security
 USER node

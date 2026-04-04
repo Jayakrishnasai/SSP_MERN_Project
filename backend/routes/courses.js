@@ -3,14 +3,13 @@ const express = require("express");
 const router = express.Router();
 
 /**
- * Allowed fields (strict whitelist)
- */
-const ALLOWED_FIELDS = ["task", "completed"];
-
-/**
  * Validate + sanitize input (no mass assignment)
  */
 function sanitizeTaskInput(body) {
+    if (!body || typeof body !== "object") {
+        throw new TypeError("Invalid request body");
+    }
+
     const sanitized = {};
 
     // Validate "task"
@@ -37,16 +36,17 @@ function sanitizeTaskInput(body) {
  */
 router.post("/", async (req, res) => {
     try {
-        const data = sanitizeTaskInput(req.body);
+        // Compliant Solution: Destructure ONLY permitted fields (S4684)
+        const { task, completed } = req.body;
+        
+        // Pass sanitized fields explicitly to constructor
+        const newTask = new Task({
+            task: typeof task === "string" ? task.trim() : "",
+            completed: typeof completed === "boolean" ? completed : false
+        });
 
-        // Explicit assignment (NO direct object injection)
-        const task = new Task();
-        task.task = data.task === undefined ? "" : data.task;
-        task.completed = data.completed === undefined ? false : data.completed;
-
-        await task.save();
-
-        return res.status(201).json(task);
+        await newTask.save();
+        return res.status(201).json(newTask);
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }
@@ -65,30 +65,30 @@ router.get("/", async (req, res) => {
 });
 
 /**
- * UPDATE Task (SAFE - no $set mass assignment)
+ * UPDATE Task
  */
 router.put("/:id", async (req, res) => {
     try {
-        const data = sanitizeTaskInput(req.body);
+        const existingTask = await Task.findById(req.params.id);
 
-        const task = await Task.findById(req.params.id);
-
-        if (!task) {
+        if (!existingTask) {
             return res.status(404).json({ message: "Task not found" });
         }
 
-        // Explicit field updates (critical for Sonar)
-        if (data.task !== undefined) {
-            task.task = data.task;
+        // Compliant Solution: Destructure ONLY permitted fields (S4684)
+        const { task, completed } = req.body;
+
+        // Explicitly update only allowed fields
+        if (typeof task === "string" && task.trim() !== "") {
+            existingTask.task = task.trim();
         }
 
-        if (data.completed !== undefined) {
-            task.completed = data.completed;
+        if (typeof completed === "boolean") {
+            existingTask.completed = completed;
         }
 
-        await task.save();
-
-        return res.status(200).json(task);
+        await existingTask.save();
+        return res.status(200).json(existingTask);
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }
@@ -112,3 +112,4 @@ router.delete("/:id", async (req, res) => {
 });
 
 module.exports = router;
+module.exports.sanitizeTaskInput = sanitizeTaskInput;

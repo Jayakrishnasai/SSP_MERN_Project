@@ -13,28 +13,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Full history needed for SonarCloud analysis
+          fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
 
       - name: Install Dependencies
         run: |
-          cd frontend && npm install --ignore-scripts
-          cd ../backend && npm install --ignore-scripts
+          cd frontend && npm ci --ignore-scripts
+          cd ../backend && npm ci --ignore-scripts
+
+      - name: Run Backend Tests
+        working-directory: backend
+        run: npm test
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@2500896589ef8f7247069a56136f8dc177c27ccf # v3
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
       - name: SonarQube Quality Gate Check
-        # continue-on-error: true # Uncomment if you want to deploy even if quality gate fails
         uses: sonarsource/sonarqube-quality-gate-action@d304d050d930b02a896b0f85935344f023928496 # v1.1.0
         timeout-minutes: 5
         env:
@@ -53,18 +56,9 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Navigate to the project directory on EC2
             cd ~/SSP_MERN_Project
-            
-            # Update code from the 'main' branch
             git pull origin main
-            
-            # Rebuild and restart the containerized services
             docker-compose down
             docker-compose up -d --build
-            
-            # Prune unused images to save space
             docker image prune -f
-            
-            # Output final container status
             docker ps

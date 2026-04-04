@@ -9,10 +9,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --ignore-scripts
+RUN npm ci --ignore-scripts
 
-# Copy the rest of the application code to the container
-COPY . .
+# Copy only application source files
+COPY src ./src
+COPY public ./public
+COPY nginx.conf ./nginx.conf
+COPY tailwind.config.js ./
 
 # Build the React app
 RUN npm run build
