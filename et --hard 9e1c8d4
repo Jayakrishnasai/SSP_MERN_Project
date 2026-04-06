@@ -1,0 +1,149 @@
+[33m9e1c8d4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Enhance SECURITY.md with version support and reporting
+[33m83acd22[m Update attribution from SSP to SSP GLOBAL
+[33m503f046[m Update README.md
+[33ma0514af[m Update README.md
+[33maef2a64[m Update README.md
+[33m90169f7[m Update README.md
+[33me6d3407[m Update README.md
+[33m1840930[m Fix closing div tag in README.md
+[33m8279150[m Revise README structure and content
+[33mbf510ac[m Update README.md
+[33m4e0f16c[m Update README.md
+[33md944a3c[m Enhance README layout and images
+[33m2433135[m Revise README for improved clarity and visuals
+[33m1ae70bc[m Add files via upload
+[33m2f49f98[m Refresh project documentation
+[33m4d7ef7d[m Add files via upload
+[33m9291edb[m Update README.md
+[33m0e304c9[m Update README.md
+[33m210f4fe[m Remove Trivy stage from CI pipeline
+[33m1c3d884[m Add frontend coverage for Sonar gate
+[33mb234bc5[m Expand backend coverage for Sonar gate
+[33mdd40d3d[m Classify Sonar test files correctly
+[33mdb1e585[m Add backend coverage tests for Sonar gate
+[33ma1b2dbe[m Delete frontend/frontend.yml
+[33m6974718[m Delete backend/backend.yml
+[33mb85f7bb[m Use immutable deploy images and clear final Sonar issues
+[33mbd175fd[m Fixed SonarQube Issues
+[33m0c0f5ab[m Update CI CD workflow for monorepo deployment
+[33mf27ee2a[m Refresh frontend lockfile for npm ci
+[33mfddcdf2[m Fixed tye sonarqube Issues
+[33m1aea84d[m Harden app and infra for Sonar quality gate
+[33m511fbe4[m Delete mongodb directory
+[33med09783[m Delete mongodb/azure-pipelines.yml
+[33m8b4fc0b[m Delete mongodb/DB/database.yml
+[33m0b3bc91[m Exclude generated coverage files from Sonar analysis
+[33m9d24fe0[m Fix GitHub Actions workflow for npm ci
+[33mfcc67f4[m Fix GitHub Actions npm cache paths
+[33m584998c[m Update cicd.yml
+[33m7076fbf[m Delete backend/azure-pipelines.yml
+[33m89c332e[m Delete frontend/service.yml
+[33m499aa5d[m Delete frontend/azure-pipelines.yml
+[33ma57c7c6[m Restore nested yaml entries in frontend lockfile
+[33m431380d[m Fix frontend yaml dependency for CI
+[33m7e43dac[m Fix Docker and compose SonarQube issues
+[33m7072a36[m Revert non-docker changes and keep container focus
+[33m9625f40[m Delete frontend/frontend.yml
+[33m6916c55[m Delete backend/backend.yml
+[33m7dc2cf7[m Fix missing nested yaml entries in frontend lockfile
+[33m079fae9[m Fix frontend lockfile for CI installs
+[33m2fa201a[m Fix SonarQube issues across backend frontend and k8s
+[33mc86b756[m Final security hardening: pass Quality Gate with coverage, SHA pinning, npm ci, non-root containers, restricted CORS, and mass assignment fix (S4684)
+[33me1a42b1[m Fix all 11 SonarCloud security hotspots: SHA pinning, ignore-scripts, CORS, x-powered-by, dockerignore
+[33me53b211[m Fix 6 SonarCloud security hotspots: pin Actions versions, run containers as non-root
+[33m8b88f3c[m Revert "Fix lint warnings in courses.js"
+[33m97f0573[m Fix lint warnings in courses.js
+[33m23ff2fd[m Fix lint warnings and improve code quality in courses.js
+[33mcf76aeb[m Deploy final production CI/CD pipeline with SonarCloud and EC2 integration
+[33m04dc416[m Sync GitHub Actions and SonarCloud configuration with user snippet
+[33mdfe444c[m Update sonar.sources to frontend,backend in SonarCloud configuration
+[33m74aa58d[m Update sonar-project.properties for SonarCloud organization: jayakrishnasai
+[33m27a9fd7[m Add GitHub Actions CI/CD with SonarQube Quality Gate
+[33m9250199[m Update frontend port mapping to 80 for production access
+[33m9fb547c[m docs: update EC2 IP to 54.206.26.82 in README
+[33m81e0be5[m Revert "Readme creted successful"
+[33m9ee1e10[m Readme creted successful
+[33m5e2b900[m feat: Docker Compose orchestration, backend fixes, theme adaptability, alumni carousel UI
+[33m3a6c74e[m Merge pull request #4 from Jayakrishnasai/palette-ux-accessibility-improvements-1834792126481365284
+[33m81583e6[m Merge branch 'main' into palette-ux-accessibility-improvements-1834792126481365284
+[33m2705280[m Merge pull request #6 from Jayakrishnasai/palette-navigation-accessibility-16117019962139993617
+[33ma3963c3[m Merge branch 'main' into palette-navigation-accessibility-16117019962139993617
+[33m87d6edc[m Merge pull request #7 from Jayakrishnasai/palette/enhance-contact-form-ux-12054033734420432016
+[33mf05e811[m Merge branch 'main' into palette/enhance-contact-form-ux-12054033734420432016
+[33m3790ca1[m Merge pull request #8 from Jayakrishnasai/palette/header-accessibility-improvements-15523296528402516222
+[33mb2e1d6b[m 🎨 Palette: Improve Header accessibility with semantic elements and ARIA labels
+[33mf284fd4[m 🎨 Palette: Enhance contact form accessibility and keyboard UX
+[33me3c6778[m 🎨 Palette: Navigation & Interaction Accessibility Improvements
+[33m78480bd[m Merge pull request #5 from Jayakrishnasai/ui-ux-redesign-v2-9117171462594315727
+[33m6311454[m Complete UI/UX redesign with modern Tailwind CSS and modular architecture
+[33m401e1f4[m 🎨 Palette: Enhance accessibility and security of the UI components.
+[33m4a16a99[m Update .env
+[33m93b1235[m Update frontend.yml
+[33md079468[m Update frontend.yml
+[33m92fe7d7[m Update azure-pipelines.yml
+[33mb34fcd9[m Update azure-pipelines.yml
+[33md3dc5ea[m Update frontend.yml
+[33m85820db[m Update nginx.conf
+[33m9dac2df[m Update .env
+[33mab0fa1b[m Set up CI with Azure Pipelines
+[33m64e4bae[m Update nginx.conf
+[33m1c02f46[m Update .env
+[33mc4d229d[m Update nginx.conf
+[33m714b71f[m Update .env
+[33mbb40d1e[m Update .env
+[33m554845a[m Update nginx.conf
+[33mc60e114[m Update nginx.conf
+[33mb271e4f[m Update .env
+[33mf8356e9[m Update .env
+[33mc9d5f84[m Update nginx.conf
+[33md0a39fd[m Update .env
+[33m9bdd166[m Update nginx.conf
+[33mc882338[m Update nginx.conf
+[33m5b66e8c[m Update .env
+[33mf20efd7[m Update azure-pipelines.yml
+[33mc8d2dc0[m Update azure-pipelines.yml
+[33m18a94dd[m Update frontend.yml
+[33mf50b1ab[m Set up CI with Azure Pipelines
+[33m9527987[m Update package-lock.json
+[33mf787214[m Merge pull request #3 from Jayakrishnasai/feature/update-readme
+[33m7f5ff6b[m Revert "feat: Convert to multi-page application with routing"
+[33me8bd6d2[m Update frontend.yml
+[33m2e22335[m Update package-lock.json
+[33mfd631c4[m Set up CI with Azure Pipelines
+[33ma74646c[m Update .env
+[33mc619e20[m Update nginx.conf
+[33mcfc834b[m Merge pull request #1 from Jayakrishnasai/feature/update-readme
+[33m56d8c58[m docs: Create comprehensive README.md
+[33md64e25e[m Update azure-pipelines.yml
+[33mc9a589a[m Update .env
+[33m1ec14fa[m Update nginx.conf
+[33m1eb4787[m Update .env
+[33m2a57aa3[m Update nginx.conf
+[33m939adb4[m Update .env
+[33m9ed3214[m Update nginx.conf
+[33m580c6c5[m Update .env
+[33m18e636e[m Update nginx.conf
+[33m5dba285[m Update nginx.conf
+[33m2c84e39[m Update nginx.conf
+[33m8d5734b[m Update nginx.conf
+[33m5877d4f[m Update nginx.conf
+[33m72f3f54[m Update App.js
+[33m0cc0c0a[m Update nginx.conf
+[33m756d937[m Update nginx.conf
+[33m3048ce7[m Update frontend.yml
+[33m7dbb014[m Update frontend.yml
+[33mc8575c6[m Update azure-pipelines.yml
+[33m1c367f2[m Update azure-pipelines.yml
+[33m2986b65[m Update azure-pipelines.yml
+[33m6615d4e[m Update frontend.yml
+[33mc9cb50c[m Set up CI with Azure Pipelines
+[33mbfc629e[m Update .env
+[33mbda05f0[m Update nginx.conf
+[33m9ece324[m Delete Jenkinsfile
+[33m3d22500[m Add files via upload
+[33me856449[m Create a
+[33md46af47[m Create taskServices.js
+[33m72a3071[m Delete src/a
+[33m3eaba9d[m Add files via upload
+[33m9915d4b[m Create a
+[33m0e9a233[m Add files via upload

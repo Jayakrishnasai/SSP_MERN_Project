@@ -1,0 +1,212 @@
+name: SSP CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  BACKEND_IMAGE: jayakrishnasai/ssp-backend
+  FRONTEND_IMAGE: jayakrishnasai/ssp-frontend
+
+jobs:
+
+# ==========================================
+# 🧪 QUALITY STAGE (Shift Left Testing)
+# ==========================================
+  quality-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # Backend
+      - name: Install Backend
+        working-directory: backend
+        run: npm ci --ignore-scripts --no-audit
+
+      - name: Test Backend
+        working-directory: backend
+        run: npm test -- --runInBand
+
+      # Frontend
+      - name: Install Frontend
+        working-directory: frontend
+        run: npm ci --ignore-scripts --no-audit
+
+      - name: Test Frontend
+        working-directory: frontend
+        env:
+          CI: true
+        run: npm test -- --coverage --watchAll=false --runInBand
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
+
+      # Coverage artifact (used by Sonar)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            backend/coverage/lcov.info
+            frontend/coverage/lcov.info
+
+# ==========================================
+# 🔍 STATIC CODE ANALYSIS (Sonar)
+# ==========================================
+  sonar:
+    needs: quality-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: coverage
+
+      - name: Sonar Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+
+      - name: Enforce Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+# ==========================================
+# 🔐 SECURITY SCAN (Docker + Dependencies)
+# ==========================================
+  security:
+    needs: sonar
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy Scan (Filesystem)
+        uses: aquasecurity/trivy-action@v0.20.0
+        with:
+          scan-type: fs
+          severity: CRITICAL,HIGH
+          exit-code: 1
+
+# ==========================================
+# 🐳 DOCKER BUILD (Optimized + Cached)
+# ==========================================
+  docker:
+    needs: security
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Backend Image
+      - name: Build & Push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
+
+      # Frontend Image
+      - name: Build & Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
+
+# ==========================================
+# 🚀 DEPLOYMENT (Safe + Rollback Enabled)
+# ==========================================
+  deploy:
+    needs: docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        env:
+          BACKEND_IMAGE: ${{ env.BACKEND_IMAGE }}
+          FRONTEND_IMAGE: ${{ env.FRONTEND_IMAGE }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: BACKEND_IMAGE,FRONTEND_IMAGE,GITHUB_SHA
+          script: |
+            set -e
+
+            cd ~/SSP_MERN_Project
+
+            echo "🔹 Deploying version: $GITHUB_SHA"
+
+            # Backup current version (for rollback)
+            docker ps --format "{{.Image}}" > previous_version.txt || true
+
+            export BACKEND_IMAGE_TAG="$BACKEND_IMAGE:${GITHUB_SHA}"
+            export FRONTEND_IMAGE_TAG="$FRONTEND_IMAGE:${GITHUB_SHA}"
+
+            # Pull new images
+            docker compose pull
+
+            # Start new containers
+            docker compose up -d --remove-orphans
+
+            echo "⏳ Waiting for services to stabilize..."
+            sleep 20
+
+            # Health check validation
+            if ! curl -f http://localhost/; then
+              echo "❌ Deployment failed. Rolling back..."
+
+              PREV_BACKEND=$(grep backend previous_version.txt | head -1)
+              PREV_FRONTEND=$(grep frontend previous_version.txt | head -1)
+
+              export BACKEND_IMAGE_TAG=$PREV_BACKEND
+              export FRONTEND_IMAGE_TAG=$PREV_FRONTEND
+
+              docker compose up -d
+              exit 1
+            fi
+
+            echo "✅ Deployment successful"
+
+            # Cleanup
+            docker image prune -af
+            docker ps

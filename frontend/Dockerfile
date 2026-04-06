@@ -1,23 +1,20 @@
-FROM node:20-alpine AS build
-
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-
-RUN npm ci --ignore-scripts
-
-COPY src ./src
-COPY public ./public
-COPY nginx.conf ./nginx.conf
-COPY tailwind.config.js ./
-
-RUN npm run build
-
 FROM nginxinc/nginx-unprivileged:alpine
 
+# Remove default config (IMPORTANT)
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy your config properly
 COPY nginx.conf /etc/nginx/nginx.conf
+
 COPY --from=build /app/build /usr/share/nginx/html
-RUN mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp
+
+# Ensure temp dirs exist and are writable
+RUN mkdir -p /tmp/client_temp \
+    /tmp/proxy_temp \
+    /tmp/fastcgi_temp \
+    /tmp/uwsgi_temp \
+    /tmp/scgi_temp \
+    && chmod -R 777 /tmp
 
 EXPOSE 8080
 

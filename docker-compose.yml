@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   mongodb:
     image: mongo:4.4.6
@@ -11,11 +13,7 @@ services:
     volumes:
       - mongo-data:/data/db
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "echo 'db.runCommand({ ping: 1 }).ok' | mongo localhost:27017/test --quiet"
-        ]
+      test: [ "CMD-SHELL", "echo 'db.runCommand({ ping: 1 }).ok' | mongo localhost:27017/test --quiet" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -40,23 +38,24 @@ services:
       USE_DB_AUTH: ${USE_DB_AUTH:-false}
     ports:
       - "3100:3100"
+
+    # ✅ Secure backend (good practice)
     read_only: true
     tmpfs:
       - /tmp
+
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
+
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "node -e \"require('http').get('http://127.0.0.1:3100/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\""
-        ]
+      test: [ "CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:3100/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\"" ]
       interval: 15s
       timeout: 5s
       retries: 10
       start_period: 20s
+
     networks:
       - ssp-network
 
@@ -68,27 +67,29 @@ services:
     depends_on:
       backend-api:
         condition: service_healthy
+
     ports:
       - "80:8080"
-    read_only: true
+
+    # ✅ ONLY /tmp needed (nginx uses this)
     tmpfs:
       - /tmp
-      - /var/cache/nginx:rw,uid=101,gid=101,mode=755
-      - /var/run:rw,uid=101,gid=101,mode=755
+
+    # ❌ DO NOT use read_only here (causes your crash)
+    # read_only: true  ← removed intentionally
+
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
+
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget --spider --quiet http://127.0.0.1:8080 || exit 1"
-        ]
+      test: [ "CMD-SHELL", "wget --spider --quiet http://127.0.0.1:8080 || exit 1" ]
       interval: 15s
       timeout: 5s
       retries: 10
       start_period: 20s
+
     networks:
       - ssp-network
 
