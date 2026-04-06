@@ -95,6 +95,28 @@ describe("sanitizeTaskInput", () => {
             expect(error.message).toBe("The completed field must be a boolean");
         }
     });
+
+    test("throws when task is not a string", () => {
+        expect.assertions(2);
+
+        try {
+            sanitizeTaskInput({ task: 123 });
+        } catch (error) {
+            expect(error.statusCode).toBe(400);
+            expect(error.message).toBe("The task field must be a string");
+        }
+    });
+
+    test("throws when task is empty after trimming", () => {
+        expect.assertions(2);
+
+        try {
+            sanitizeTaskInput({ task: "   " });
+        } catch (error) {
+            expect(error.statusCode).toBe(400);
+            expect(error.message).toBe("The task field cannot be empty");
+        }
+    });
 });
 
 describe("courses routes", () => {
