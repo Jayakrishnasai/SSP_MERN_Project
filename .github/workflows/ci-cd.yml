@@ -154,6 +154,7 @@ jobs:
           BACKEND_IMAGE: ${{ env.BACKEND_IMAGE }}
           FRONTEND_IMAGE: ${{ env.FRONTEND_IMAGE }}
           REPO_DIR: ${{ secrets.REPO_DIR }}
+          SSH_USER: ${{ secrets.SSH_USER }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
