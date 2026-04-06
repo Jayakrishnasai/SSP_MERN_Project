@@ -34,9 +34,7 @@ RUN mkdir -p /tmp/client_temp \
     /tmp/proxy_temp \
     /tmp/fastcgi_temp \
     /tmp/uwsgi_temp \
-    /tmp/scgi_temp \
-    && chown -R nginx:nginx /tmp \
-    && chmod -R 750 /tmp
+    /tmp/scgi_temp
 
 EXPOSE 8080
 
