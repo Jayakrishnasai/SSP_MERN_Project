@@ -12,8 +12,11 @@ COPY package*.json ./
 RUN npm ci --omit=dev --ignore-scripts \
     && npm cache clean --force
 
-# Copy all source code (safer)
-COPY . .
+# Specifically copy only necessary folders and config to satisfy Sonar 100% bypass
+COPY routes ./routes
+COPY models ./models
+COPY db.js ./
+COPY index.js ./
 
 # Sonar build guard ensuring no secrets leak AND change ownership
 RUN test ! -f .env \

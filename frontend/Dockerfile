@@ -7,8 +7,10 @@ COPY package*.json ./
 
 RUN npm ci --ignore-scripts --no-audit
 
-# Copy all source code (safer with strict .dockerignore)
-COPY . .
+# Specifically copy only necessary folders and config to satisfy Sonar 100% bypass
+COPY src ./src
+COPY public ./public
+COPY tailwind.config.js ./
 
 # Sonar build guard ensuring no secrets leak
 RUN test ! -f .env
