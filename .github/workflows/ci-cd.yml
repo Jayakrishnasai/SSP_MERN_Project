@@ -153,15 +153,23 @@ jobs:
         env:
           BACKEND_IMAGE: ${{ env.BACKEND_IMAGE }}
           FRONTEND_IMAGE: ${{ env.FRONTEND_IMAGE }}
+          REPO_DIR: ${{ secrets.REPO_DIR }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: BACKEND_IMAGE,FRONTEND_IMAGE,GITHUB_SHA
+          envs: BACKEND_IMAGE,FRONTEND_IMAGE,GITHUB_SHA,REPO_DIR,SSH_USER
           script: |
             set -e
 
-            cd ~/SSP_MERN_Project
+            REPO_DIR="${REPO_DIR:-/home/${SSH_USER}/SSP_MERN_Project}"
+
+            if [ ! -d "$REPO_DIR" ]; then
+              echo "Repository directory not found at $REPO_DIR"
+              exit 1
+            fi
+
+            cd "$REPO_DIR"
 
             echo "🔹 Deploying version: $GITHUB_SHA"
 
