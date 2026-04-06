@@ -36,6 +36,8 @@ services:
       DB_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-}
       DB_AUTH_SOURCE: ${DB_AUTH_SOURCE:-admin}
       USE_DB_AUTH: ${USE_DB_AUTH:-false}
+      FRONTEND_URL: ${FRONTEND_URL:-}
+      ALLOW_ANY_ORIGIN: ${ALLOW_ANY_ORIGIN:-true}
     ports:
       - "3100:3100"
 

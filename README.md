@@ -167,6 +167,13 @@ MONGO_INITDB_ROOT_PASSWORD=change-me
 USE_DB_AUTH=true
 ```
 
+If you're accessing the frontend on a remote host, set:
+
+```bash
+FRONTEND_URL=http://your-server-ip-or-domain
+ALLOW_ANY_ORIGIN=true
+```
+
 ---
 
 # 🌐 ACCESS

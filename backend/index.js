@@ -20,12 +20,19 @@ const allowedOrigins = new Set(
         "http://localhost:3000",
         "http://localhost:80",
         "http://localhost",
+        "http://127.0.0.1",
+        "http://127.0.0.1:80",
     ].filter(Boolean)
 );
+const allowAnyOrigin = process.env.ALLOW_ANY_ORIGIN === "true";
 
 app.use(
     cors({
         origin(origin, callback) {
+            if (allowAnyOrigin) {
+                return callback(null, true);
+            }
+
             if (!origin || allowedOrigins.has(origin)) {
                 return callback(null, true);
             }
