@@ -159,6 +159,14 @@ cd SSP_MERN_Project
 docker compose up -d --build
 ```
 
+If you want MongoDB authentication enabled for Docker Compose, create a `.env` file at the repo root with:
+
+```bash
+MONGO_INITDB_ROOT_USERNAME=admin
+MONGO_INITDB_ROOT_PASSWORD=change-me
+USE_DB_AUTH=true
+```
+
 ---
 
 # 🌐 ACCESS

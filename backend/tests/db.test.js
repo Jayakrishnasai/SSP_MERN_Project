@@ -8,16 +8,19 @@ const connectDB = require("../db");
 describe("connectDB", () => {
     const originalEnv = process.env;
     const originalConsoleLog = console.log;
+    const originalConsoleWarn = console.warn;
 
     beforeEach(() => {
         jest.clearAllMocks();
         process.env = { ...originalEnv };
         console.log = jest.fn();
+        console.warn = jest.fn();
     });
 
     afterEach(() => {
         process.env = originalEnv;
         console.log = originalConsoleLog;
+        console.warn = originalConsoleWarn;
     });
 
     test("throws when DB_CONN_STR is missing", async () => {
@@ -57,6 +60,52 @@ describe("connectDB", () => {
             {
                 user: "admin",
                 pass: "secret",
+                authSource: "admin",
+            }
+        );
+    });
+
+    test("normalizes empty credential placeholders in the connection string", async () => {
+        process.env.DB_CONN_STR =
+            "mongodb://:@mongodb:27017/perseverance?authSource=admin";
+        process.env.USE_DB_AUTH = "false";
+
+        await connectDB();
+
+        expect(mongoose.connect).toHaveBeenCalledWith(
+            "mongodb://mongodb:27017/perseverance?authSource=admin",
+            {}
+        );
+    });
+
+    test("warns and connects without auth when USE_DB_AUTH is true but credentials are missing", async () => {
+        process.env.DB_CONN_STR = "mongodb://localhost:27017/test";
+        process.env.USE_DB_AUTH = "true";
+
+        await connectDB();
+
+        expect(console.warn).toHaveBeenCalledWith(
+            "USE_DB_AUTH is enabled, but DB_USERNAME or DB_PASSWORD is missing. Connecting without MongoDB authentication."
+        );
+        expect(mongoose.connect).toHaveBeenCalledWith(
+            "mongodb://localhost:27017/test",
+            {}
+        );
+    });
+
+    test("enables auth automatically when credentials are present", async () => {
+        process.env.DB_CONN_STR = "mongodb://localhost:27017/test";
+        process.env.DB_USERNAME = "admin";
+        process.env.DB_PASSWORD = "secret";
+
+        await connectDB();
+
+        expect(mongoose.connect).toHaveBeenCalledWith(
+            "mongodb://localhost:27017/test",
+            {
+                user: "admin",
+                pass: "secret",
+                authSource: "admin",
             }
         );
     });

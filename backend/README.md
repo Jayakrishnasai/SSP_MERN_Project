@@ -47,9 +47,10 @@ The following environment variables are used to configure the application:
 
 - `PORT`: The port on which the server will run. Defaults to `3100`.
 - `DB_CONN_STR`: The connection string for the MongoDB database. **(Required)**
-- `USE_DB_AUTH`: Set to `true` to enable database authentication.
-- `DB_USERNAME`: The username for the database. Required if `USE_DB_AUTH` is `true`.
-- `DB_PASSWORD`: The password for the database. Required if `USE_DB_AUTH` is `true`.
+- `USE_DB_AUTH`: Set to `true` to force database authentication. If omitted, auth is enabled automatically when both `DB_USERNAME` and `DB_PASSWORD` are present.
+- `DB_USERNAME`: The username for the database. Required only when MongoDB authentication is enabled.
+- `DB_PASSWORD`: The password for the database. Required only when MongoDB authentication is enabled.
+- `DB_AUTH_SOURCE`: The MongoDB auth database. Defaults to `admin`.
 
 ## API Endpoints
 

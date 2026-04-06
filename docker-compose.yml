@@ -4,8 +4,8 @@ services:
     container_name: mongodb-server
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-}
     ports:
       - "27017:27017"
     volumes:
@@ -33,10 +33,11 @@ services:
         condition: service_healthy
     environment:
       PORT: 3100
-      DB_CONN_STR: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/perseverance?authSource=admin
-      DB_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      DB_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      USE_DB_AUTH: "true"
+      DB_CONN_STR: ${DB_CONN_STR:-mongodb://mongodb:27017/perseverance}
+      DB_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-}
+      DB_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-}
+      DB_AUTH_SOURCE: ${DB_AUTH_SOURCE:-admin}
+      USE_DB_AUTH: ${USE_DB_AUTH:-false}
     ports:
       - "3100:3100"
     read_only: true
