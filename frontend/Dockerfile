@@ -1,3 +1,19 @@
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Install dependencies first (better caching)
+COPY package*.json ./
+
+RUN npm ci --ignore-scripts --no-audit
+
+# Copy all source code (safer with strict .dockerignore)
+COPY . .
+
+RUN npm run build
+
+# ===============================================
+
 FROM nginxinc/nginx-unprivileged:alpine
 
 # Remove default config (IMPORTANT)
