@@ -10,6 +10,9 @@ RUN npm ci --ignore-scripts --no-audit
 # Copy all source code (safer with strict .dockerignore)
 COPY . .
 
+# Sonar build guard ensuring no secrets leak
+RUN test ! -f .env
+
 RUN npm run build
 
 # ===============================================
@@ -30,7 +33,8 @@ RUN mkdir -p /tmp/client_temp \
     /tmp/fastcgi_temp \
     /tmp/uwsgi_temp \
     /tmp/scgi_temp \
-    && chmod -R 777 /tmp
+    && chown -R nginx:nginx /tmp \
+    && chmod -R 750 /tmp
 
 EXPOSE 8080
 

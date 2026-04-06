@@ -15,8 +15,9 @@ RUN npm ci --omit=dev --ignore-scripts \
 # Copy all source code (safer)
 COPY . .
 
-# Change ownership to node user
-RUN chown -R node:node /usr/src/app
+# Sonar build guard ensuring no secrets leak AND change ownership
+RUN test ! -f .env \
+    && chown -R node:node /usr/src/app
 
 # Switch to non-root user
 USER node
