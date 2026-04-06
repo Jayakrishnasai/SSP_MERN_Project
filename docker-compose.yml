@@ -73,8 +73,8 @@ services:
     read_only: true
     tmpfs:
       - /tmp
-      - /var/cache/nginx
-      - /var/run
+      - /var/cache/nginx:rw,uid=101,gid=101,mode=755
+      - /var/run:rw,uid=101,gid=101,mode=755
     security_opt:
       - no-new-privileges:true
     cap_drop:
