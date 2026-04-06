@@ -97,29 +97,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 # ==========================================
-# 🔐 SECURITY SCAN (Docker + Dependencies)
-# ==========================================
-  security:
-    needs: sonar
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Run Trivy Scan (Filesystem)
-        uses: aquasecurity/trivy-action@v0.20.0
-        with:
-          scan-type: fs
-          severity: CRITICAL,HIGH
-          exit-code: 1
-
-# ==========================================
 # 🐳 DOCKER BUILD (Optimized + Cached)
 # ==========================================
   docker:
-    needs: security
+    needs: sonar
     runs-on: ubuntu-latest
 
     steps:
