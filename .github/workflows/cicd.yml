@@ -158,6 +158,9 @@ jobs:
             set -e
 
             cd ~/SSP_MERN_Project
+            if [ ! -f .env ] && [ -f .env.example ]; then
+              cp .env.example .env
+            fi
 
             export BACKEND_IMAGE_TAG="$BACKEND_IMAGE:$GITHUB_SHA"
             export FRONTEND_IMAGE_TAG="$FRONTEND_IMAGE:$GITHUB_SHA"
