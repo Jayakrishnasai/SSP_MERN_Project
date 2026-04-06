@@ -117,7 +117,7 @@ jobs:
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: d4d58fca92b90f95e0412520265f491c3c0da799
 
       - name: Build Backend Image
         run: |
