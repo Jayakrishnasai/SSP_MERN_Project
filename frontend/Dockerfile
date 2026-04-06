@@ -17,6 +17,7 @@ FROM nginxinc/nginx-unprivileged:alpine
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=build /app/build /usr/share/nginx/html
+RUN mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp
 
 EXPOSE 8080
 
