@@ -25,27 +25,6 @@
 
 ---
 
-# 👨‍💻 ABOUT THE DEVELOPER
-
-<div align="center">
-
-<img src="https://readme-typing-svg.herokuapp.com?size=24&duration=2000&color=00FFAB&center=true&vCenter=true&width=900&lines=DevOps+Engineer+%7C+Full+Stack+Developer;Building+Scalable+Production+Systems;Focused+on+Automation+%26+Cloud"/>
-
-</div>
-
-```text
-Computer Science Engineering Graduate
-Currently working with SSP GLOBAL – Software Training Institute & Software Solutions
-
-✔ Implementing automated CI/CD pipelines for production workflows  
-✔ Designing and deploying containerized, production-grade applications  
-✔ Deploying and managing cloud infrastructure on AWS  
-✔ Developing end-to-end MERN applications  
-✔ Designing scalable, production-ready systems
-```
-
----
-
 # 🌟 OVERVIEW
 
 A **production-grade MERN monorepo application** engineered with:
