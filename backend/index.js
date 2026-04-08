@@ -47,6 +47,10 @@ app.use(
 const promClient = require("prom-client");
 promClient.collectDefaultMetrics();
 
+app.get("/health", (_req, res) => {
+    return res.status(200).json({ status: "ok" });
+});
+
 app.get("/metrics", async (req, res) => {
     try {
         res.set("Content-Type", promClient.register.contentType);
@@ -56,10 +60,6 @@ app.get("/metrics", async (req, res) => {
         console.error("Failed to get metrics:", err);
         return res.status(500).send("Failed to get metrics");
     }
-});
-
-app.get("/health", (_req, res) => {
-    return res.status(200).json({ status: "ok" });
 });
 
 app.use("/courses", courses);
