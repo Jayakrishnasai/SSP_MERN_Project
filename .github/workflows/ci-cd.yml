@@ -18,7 +18,7 @@ env:
 jobs:
 
 # ==========================================
-# 🧪 QUALITY STAGE (Shift Left Testing)
+# 🧪 QUALITY STAGE (CI - GitHub Hosted)
 # ==========================================
   quality-check:
     runs-on: ubuntu-latest
@@ -60,8 +60,8 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      # Coverage artifact (used by Sonar)
-      - uses: actions/upload-artifact@v4
+      - name: Upload Coverage
+        uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: |
@@ -69,7 +69,7 @@ jobs:
             frontend/coverage/lcov.info
 
 # ==========================================
-# 🔍 STATIC CODE ANALYSIS (Sonar)
+# 🔍 SONAR ANALYSIS (CI)
 # ==========================================
   sonar:
     needs: quality-check
@@ -97,7 +97,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 # ==========================================
-# 🐳 DOCKER BUILD (Optimized + Cached)
+# 🐳 DOCKER BUILD & PUSH (CI)
 # ==========================================
   docker:
     needs: sonar
@@ -105,8 +105,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: docker/setup-buildx-action@v3
 
@@ -124,8 +122,6 @@ jobs:
           tags: |
             ${{ env.BACKEND_IMAGE }}:latest
             ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
 
       # Frontend Image
       - name: Build & Push Frontend
@@ -136,75 +132,36 @@ jobs:
           tags: |
             ${{ env.FRONTEND_IMAGE }}:latest
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-          cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
 
 # ==========================================
-# 🚀 DEPLOYMENT (Safe + Rollback Enabled)
+# 🚀 DEPLOY (CD - SELF HOSTED EC2)
 # ==========================================
   deploy:
     needs: docker
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, ec2]   # 🔥 THIS IS THE KEY CHANGE
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        env:
-          BACKEND_IMAGE: ${{ env.BACKEND_IMAGE }}
-          FRONTEND_IMAGE: ${{ env.FRONTEND_IMAGE }}
-          REPO_DIR: ${{ secrets.REPO_DIR }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: BACKEND_IMAGE,FRONTEND_IMAGE,GITHUB_SHA,REPO_DIR,SSH_USER
-          script: |
-            set -e
+      - name: Debug Runner Info
+        run: |
+          echo "Running on:"
+          hostname
+          uname -a
 
-            REPO_DIR="${REPO_DIR:-/home/${SSH_USER}/SSP_MERN_Project}"
+      - name: Pull Latest Images
+        run: |
+          docker pull ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker pull ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
 
-            if [ ! -d "$REPO_DIR" ]; then
-              echo "Repository directory not found at $REPO_DIR"
-              exit 1
-            fi
+      - name: Deploy Application
+        run: |
+          cd /home/ubuntu/SSP_MERN_Project
 
-            cd "$REPO_DIR"
+          export BACKEND_IMAGE_TAG=${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          export FRONTEND_IMAGE_TAG=${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
 
-            echo "🔹 Deploying version: $GITHUB_SHA"
+          docker compose down
+          docker compose up -d --remove-orphans
 
-            # Backup current version (for rollback)
-            docker ps --format "{{.Image}}" > previous_version.txt || true
-
-            export BACKEND_IMAGE_TAG="$BACKEND_IMAGE:${GITHUB_SHA}"
-            export FRONTEND_IMAGE_TAG="$FRONTEND_IMAGE:${GITHUB_SHA}"
-
-            # Pull new images
-            docker compose pull
-
-            # Start new containers
-            docker compose up -d --remove-orphans
-
-            echo "⏳ Waiting for services to stabilize..."
-            sleep 20
-
-            # Health check validation
-            if ! curl -f http://localhost/; then
-              echo "❌ Deployment failed. Rolling back..."
-
-              PREV_BACKEND=$(grep backend previous_version.txt | head -1)
-              PREV_FRONTEND=$(grep frontend previous_version.txt | head -1)
-
-              export BACKEND_IMAGE_TAG=$PREV_BACKEND
-              export FRONTEND_IMAGE_TAG=$PREV_FRONTEND
-
-              docker compose up -d
-              exit 1
-            fi
-
-            echo "✅ Deployment successful"
-
-            # Cleanup
-            docker image prune -af
-            docker ps
+      - name: Cleanup Old Images
+        run: docker image prune -af
