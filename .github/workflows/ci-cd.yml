@@ -16,15 +16,15 @@ env:
   FRONTEND_IMAGE: jayakrishnasai/ssp-frontend
 
 jobs:
-  # ==========================================
-  # 🧪 QUALITY CHECK (CI)
-  # ==========================================
   quality-check:
+    name: 1. Validate Backend and Frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -32,66 +32,66 @@ jobs:
             backend/package-lock.json
             frontend/package-lock.json
 
-      # Backend
-      - run: npm ci --prefix backend
-      - run: npm test --prefix backend
+      - name: Install backend dependencies
+        run: npm ci --prefix backend
 
-      # Frontend
-      - run: npm ci --prefix frontend
-      - run: npm test --prefix frontend -- --coverage --watchAll=false
+      - name: Run backend tests
+        run: npm test --prefix backend
 
-  # ==========================================
-  # 🔍 SONAR ANALYSIS
-  # ==========================================
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+
+      - name: Run frontend tests with coverage
+        run: npm test --prefix frontend -- --coverage --watchAll=false
+
   sonar:
+    name: 2. Run SonarCloud Analysis
     needs: quality-check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: SonarSource/sonarqube-scan-action@v2
+      - name: Scan code quality and coverage in SonarCloud
+        uses: SonarSource/sonarqube-scan-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
-  # ==========================================
-  # 🐳 DOCKER BUILD + TRIVY SCAN
-  # ==========================================
   docker-build:
+    name: 3. Build and Security-Scan Docker Images
     needs: sonar
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # Build Backend
-      - name: Build Backend
+      - name: Build backend Docker image
         run: docker build -t ${{ env.BACKEND_IMAGE }}:${{ github.sha }} ./backend
 
-      - name: Scan Backend (Trivy)
+      - name: Scan backend image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ env.BACKEND_IMAGE }}:${{ github.sha }}'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          image-ref: "${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
 
-      # Build Frontend
-      - name: Build Frontend
+      - name: Build frontend Docker image
         run: docker build -t ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} ./frontend
 
-      - name: Scan Frontend (Trivy)
+      - name: Scan frontend image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ env.FRONTEND_IMAGE }}:${{ github.sha }}'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          image-ref: "${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
 
-      # Save images
-      - name: Save Images
+      - name: Export built Docker images
         run: |
           docker save ${{ env.BACKEND_IMAGE }}:${{ github.sha }} -o backend.tar
           docker save ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} -o frontend.tar
 
-      - name: Upload Images
+      - name: Upload Docker image artifacts
         uses: actions/upload-artifact@v4
         with:
           name: docker-images
@@ -99,52 +99,54 @@ jobs:
             backend.tar
             frontend.tar
 
-  # ==========================================
-  # 📦 DOCKER PUSH
-  # ==========================================
   docker-push:
+    name: 4. Push Docker Images to Docker Hub
     needs: docker-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download built Docker image artifacts
+        uses: actions/download-artifact@v4
         with:
           name: docker-images
 
-      - name: Load Images
+      - name: Load Docker images
         run: |
           docker load -i backend.tar
           docker load -i frontend.tar
 
-      - name: Login DockerHub
+      - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # Tag latest
-      - name: Tag Latest
+      - name: Tag images for release
         run: |
           docker tag ${{ env.BACKEND_IMAGE }}:${{ github.sha }} ${{ env.BACKEND_IMAGE }}:latest
           docker tag ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} ${{ env.FRONTEND_IMAGE }}:latest
 
-      # Push
-      - run: docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
-      - run: docker push ${{ env.BACKEND_IMAGE }}:latest
-      - run: docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-      - run: docker push ${{ env.FRONTEND_IMAGE }}:latest
+      - name: Push backend image with commit SHA tag
+        run: docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
-  # ==========================================
-  # 🚀 DEPLOY (EC2 SELF-HOSTED)
-  # ==========================================
+      - name: Push backend image with latest tag
+        run: docker push ${{ env.BACKEND_IMAGE }}:latest
+
+      - name: Push frontend image with commit SHA tag
+        run: docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+
+      - name: Push frontend image with latest tag
+        run: docker push ${{ env.FRONTEND_IMAGE }}:latest
+
   deploy:
+    name: 5. Deploy Application Stack
     needs: docker-push
     runs-on: [self-hosted, Test]
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Debug Runner
+      - name: Check deployment runner
         run: |
           echo "Running on:"
           hostname
           docker --version
 
-      - name: Pull Images
+      - name: Pull released images on the server
         run: |
           docker pull ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           docker pull ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
@@ -152,7 +154,7 @@ jobs:
           docker pull grafana/grafana:latest
           docker pull prom/node-exporter:latest
 
-      - name: Deploy Stack
+      - name: Restart the application stack
         run: |
           cd /home/ubuntu/SSP_MERN_Project
 
@@ -162,5 +164,5 @@ jobs:
           docker compose down
           docker compose up -d --remove-orphans
 
-      - name: Cleanup
+      - name: Remove unused Docker images
         run: docker image prune -af
