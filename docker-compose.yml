@@ -108,6 +108,21 @@ services:
     depends_on:
       - backend-api
 
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - alertmanager-data:/alertmanager
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    ports:
+      - "${ALERTMANAGER_HOST_PORT:-9093}:9093"
+    networks:
+      - ssp-network
+
   grafana:
     image: grafana/grafana:12.4.2
     container_name: grafana
@@ -134,8 +149,6 @@ services:
       - ./grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - ssp-network
-    depends_on:
-      - prometheus
 
   node-exporter:
     image: prom/node-exporter
@@ -154,3 +167,4 @@ volumes:
   mongo-data:
   prometheus-data:
   grafana-data:
+  alertmanager-data:
