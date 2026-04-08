@@ -182,6 +182,15 @@ jobs:
     runs-on: [self-hosted, Test]
     if: github.ref == 'refs/heads/main'
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync configuration to deployment directory
+        run: |
+          mkdir -p /home/ubuntu/SSP_MERN_Project
+          cp docker-compose.yml /home/ubuntu/SSP_MERN_Project/
+          cp -r prometheus /home/ubuntu/SSP_MERN_Project/
+
       - name: Check deployment runner
         run: |
           echo "Running on:"
@@ -292,6 +301,26 @@ jobs:
           fi
 
           echo "Frontend verified successfully."
+
+      - name: Verify Prometheus is reachable
+        run: |
+          set -euo pipefail
+
+          echo "Checking Prometheus at http://127.0.0.1:9090/-/healthy"
+          for attempt in {1..10}; do
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:9090/-/healthy || true)
+            if [ "$status_code" = "200" ]; then
+              echo "Prometheus is healthy."
+              break
+            fi
+            echo "Attempt $attempt failed with status $status_code. Retrying in 5 seconds..."
+            sleep 5
+          done
+
+          if [ "$status_code" != "200" ]; then
+            echo "Prometheus health check failed."
+            exit 1
+          fi
 
   deployment-summary:
     name: 8. Capture Deployment Evidence and Release Notes
