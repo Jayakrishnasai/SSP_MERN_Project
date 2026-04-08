@@ -21,6 +21,9 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:alpine
 
+# Patch OS packages in the runtime image so Trivy sees the fixed Alpine libs
+RUN apk update && apk upgrade --no-cache
+
 # Remove default config (IMPORTANT)
 RUN rm /etc/nginx/conf.d/default.conf
 
