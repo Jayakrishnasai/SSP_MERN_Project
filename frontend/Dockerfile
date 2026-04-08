@@ -21,6 +21,8 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:alpine
 
+USER root
+
 # Patch OS packages in the runtime image so Trivy sees the fixed Alpine libs
 RUN apk update && apk upgrade --no-cache
 
@@ -38,6 +40,8 @@ RUN mkdir -p /tmp/client_temp \
     /tmp/fastcgi_temp \
     /tmp/uwsgi_temp \
     /tmp/scgi_temp
+
+USER 101
 
 EXPOSE 8080
 
