@@ -44,6 +44,14 @@ jobs:
       - name: Run frontend tests with coverage
         run: npm test --prefix frontend -- --coverage --watchAll=false
 
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            backend/coverage/lcov.info
+            frontend/coverage/lcov.info
+
   sonar:
     name: 2. Run SonarCloud Analysis
     needs: quality-check
@@ -51,6 +59,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-reports
 
       - name: Scan code quality and coverage in SonarCloud
         uses: SonarSource/sonarqube-scan-action@v2
