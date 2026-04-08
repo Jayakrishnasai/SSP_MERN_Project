@@ -108,7 +108,7 @@ services:
       - backend-api
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:12.4.2
     container_name: grafana
     restart: unless-stopped
     environment:

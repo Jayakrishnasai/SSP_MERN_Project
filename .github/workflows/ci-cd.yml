@@ -148,18 +148,38 @@ jobs:
   smoke-test:
     needs: deploy
     runs-on: [self-hosted, Test]
+    timeout-minutes: 10
     steps:
-      - name: Health Check
-        run: curl -f http://127.0.0.1:3100/health
+      - name: Smoke Checks
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      - name: Metrics Check
-        run: curl -f http://127.0.0.1:3100/metrics
+          check_url() {
+            local name="$1"
+            local url="$2"
+            local attempts="${3:-12}"
+            local delay_seconds="${4:-5}"
+            local output="/tmp/${name}.out"
 
-      - name: Frontend Check
-        run: curl -f http://127.0.0.1/
+            echo "Checking ${name}: ${url}"
+            for attempt in $(seq 1 "${attempts}"); do
+              if curl --fail --silent --show-error --max-time 10 "${url}" >"${output}"; then
+                cat "${output}"
+                echo "${name} is healthy."
+                return 0
+              fi
 
-      - name: Prometheus Check
-        run: curl -f http://127.0.0.1:9090/-/healthy
+              echo "Attempt ${attempt}/${attempts} failed for ${name}. Retrying in ${delay_seconds}s..."
+              sleep "${delay_seconds}"
+            done
 
-      - name: Grafana Check
-        run: curl -f http://127.0.0.1:${{ env.GRAFANA_HOST_PORT }}/api/health
+            echo "${name} did not become healthy in time."
+            return 1
+          }
+
+          check_url backend http://127.0.0.1:3100/health
+          check_url metrics http://127.0.0.1:3100/metrics
+          check_url frontend http://127.0.0.1/
+          check_url prometheus http://127.0.0.1:9090/-/healthy
+          check_url grafana http://127.0.0.1:${{ env.GRAFANA_HOST_PORT }}/api/health
