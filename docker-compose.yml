@@ -99,7 +99,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
       - prometheus-data:/prometheus
     ports:
       - "9090:9090"
@@ -107,21 +106,6 @@ services:
       - ssp-network
     depends_on:
       - backend-api
-
-  alertmanager:
-    image: prom/alertmanager:latest
-    container_name: alertmanager
-    restart: unless-stopped
-    volumes:
-      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-      - alertmanager-data:/alertmanager
-    command:
-      - --config.file=/etc/alertmanager/alertmanager.yml
-      - --storage.path=/alertmanager
-    ports:
-      - "${ALERTMANAGER_HOST_PORT:-9093}:9093"
-    networks:
-      - ssp-network
 
   grafana:
     image: grafana/grafana:12.4.2
@@ -142,13 +126,15 @@ services:
       GF_SMTP_STARTTLS_POLICY: OpportunisticStartTLS
       GRAFANA_ALERT_EMAIL_TO: ${GRAFANA_ALERT_EMAIL_TO:-alerts@example.com}
     ports:
-      - "${GRAFANA_HOST_PORT:-3001}:3000"
+      - "${GRAFANA_HOST_PORT:-3000}:3000"
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - ssp-network
+    depends_on:
+      - prometheus
 
   node-exporter:
     image: prom/node-exporter
@@ -167,4 +153,3 @@ volumes:
   mongo-data:
   prometheus-data:
   grafana-data:
-  alertmanager-data:
