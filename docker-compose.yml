@@ -114,12 +114,24 @@ services:
     container_name: grafana
     restart: unless-stopped
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin123}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SMTP_ENABLED: ${GRAFANA_SMTP_ENABLED:-true}
+      GF_SMTP_HOST: ${GRAFANA_SMTP_HOST:-smtp.gmail.com:587}
+      GF_SMTP_USER: ${GRAFANA_SMTP_USER:-koppolijayakrishnasai34@gmail.com}
+      GF_SMTP_PASSWORD: ${GRAFANA_SMTP_PASSWORD:-admin123}
+      GF_SMTP_FROM_ADDRESS: ${GRAFANA_SMTP_FROM_ADDRESS:-koppolijayakrishnasai34@gmail.com}
+      GF_SMTP_FROM_NAME: ${GRAFANA_SMTP_FROM_NAME:-SSP Grafana}
+      GF_SMTP_SKIP_VERIFY: "true"
+      GF_SMTP_STARTTLS_POLICY: OpportunisticStartTLS
+      GRAFANA_ALERT_EMAIL_TO: ${GRAFANA_ALERT_EMAIL_TO:-alerts@example.com}
     ports:
       - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - ssp-network
     depends_on:

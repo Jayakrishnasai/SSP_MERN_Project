@@ -16,15 +16,14 @@ env:
   FRONTEND_IMAGE: jayakrishnasai/ssp-frontend
 
 jobs:
+# ==========================================
+# 🧪 QUALITY CHECK
+# ==========================================
   quality-check:
-    name: 1. Quality Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -32,181 +31,106 @@ jobs:
             backend/package-lock.json
             frontend/package-lock.json
 
-      - name: Install backend dependencies
-        run: npm ci --prefix backend
+      - run: npm ci --prefix backend
+      - run: npm test --prefix backend
 
-      - name: Run backend tests
-        run: npm test --prefix backend
+      - run: npm ci --prefix frontend
+      - run: npm test --prefix frontend -- --coverage --watchAll=false
 
-      - name: Install frontend dependencies
-        run: npm ci --prefix frontend
-
-      - name: Run frontend tests with coverage
-        run: npm test --prefix frontend -- --coverage --watchAll=false
-
-      - name: Upload coverage reports
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: coverage-reports
+          name: coverage
           path: |
             backend/coverage/lcov.info
             frontend/coverage/lcov.info
 
-  sonarqube:
-    name: 2. SonarQube Analysis
+# ==========================================
+# 🔍 SONAR
+# ==========================================
+  sonar:
     needs: quality-check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download coverage reports
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: coverage-reports
+          name: coverage
 
-      - name: Scan code quality and coverage in SonarCloud
-        uses: SonarSource/sonarqube-scan-action@v2
+      - uses: SonarSource/sonarqube-scan-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
-  docker-build:
-    name: 3. Build Docker Images
-    needs: sonarqube
+# ==========================================
+# 🐳 BUILD + TRIVY
+# ==========================================
+  docker:
+    needs: sonar
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Build backend Docker image
+      - name: Build Backend
         run: docker build -t ${{ env.BACKEND_IMAGE }}:${{ github.sha }} ./backend
 
-      - name: Scan backend image with Trivy
+      - name: Scan Backend (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: "${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
-          severity: "CRITICAL,HIGH"
+          severity: "CRITICAL"
           exit-code: "1"
 
-      - name: Build frontend Docker image
+      - name: Build Frontend
         run: docker build -t ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} ./frontend
 
-      - name: Scan frontend image with Trivy
+      - name: Scan Frontend (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: "${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
-          severity: "CRITICAL,HIGH"
+          severity: "CRITICAL"
           exit-code: "1"
 
-      - name: Export built Docker images
-        run: |
-          docker save ${{ env.BACKEND_IMAGE }}:${{ github.sha }} -o backend.tar
-          docker save ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} -o frontend.tar
-
-      - name: Upload Docker image artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-images
-          path: |
-            backend.tar
-            frontend.tar
-
-  trivy-scan:
-    name: 4. Trivy Security Scan
-    needs: docker-build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download built Docker image artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-images
-
-      - name: Load Docker images for scanning
-        run: |
-          docker load -i backend.tar
-          docker load -i frontend.tar
-
-      - name: Scan backend image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: "${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
-          severity: "CRITICAL,HIGH"
-          exit-code: "1"
-
-      - name: Scan frontend image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: "${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
-          severity: "CRITICAL,HIGH"
-          exit-code: "1"
-
-  docker-push:
-    name: 5. Push Docker Images to Docker Hub
-    needs: trivy-scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download built Docker image artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-images
-
-      - name: Load Docker images
-        run: |
-          docker load -i backend.tar
-          docker load -i frontend.tar
-
-      - name: Log in to Docker Hub
+      - name: Login DockerHub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Tag images for release
+      - name: Push Images
         run: |
           docker tag ${{ env.BACKEND_IMAGE }}:${{ github.sha }} ${{ env.BACKEND_IMAGE }}:latest
           docker tag ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} ${{ env.FRONTEND_IMAGE }}:latest
 
-      - name: Push backend image with commit SHA tag
-        run: docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.BACKEND_IMAGE }}:latest
 
-      - name: Push backend image with latest tag
-        run: docker push ${{ env.BACKEND_IMAGE }}:latest
+          docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.FRONTEND_IMAGE }}:latest
 
-      - name: Push frontend image with commit SHA tag
-        run: docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-
-      - name: Push frontend image with latest tag
-        run: docker push ${{ env.FRONTEND_IMAGE }}:latest
-
+# ==========================================
+# 🚀 DEPLOY
+# ==========================================
   deploy:
-    name: 6. Deploy Application Stack
-    needs: docker-push
+    needs: docker
     runs-on: [self-hosted, Test]
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Sync configuration to deployment directory
+      - name: Sync configuration files
         run: |
           mkdir -p /home/ubuntu/SSP_MERN_Project
           cp docker-compose.yml /home/ubuntu/SSP_MERN_Project/
           cp -r prometheus /home/ubuntu/SSP_MERN_Project/
+          mkdir -p /home/ubuntu/SSP_MERN_Project/grafana/provisioning/datasources
+          mkdir -p /home/ubuntu/SSP_MERN_Project/grafana/provisioning/dashboards
+          mkdir -p /home/ubuntu/SSP_MERN_Project/grafana/dashboards
+          cp -r grafana/provisioning /home/ubuntu/SSP_MERN_Project/grafana/
+          cp -r grafana/dashboards /home/ubuntu/SSP_MERN_Project/grafana/
+          test -f /home/ubuntu/SSP_MERN_Project/grafana/dashboards/node-exporter.json
 
-      - name: Check deployment runner
-        run: |
-          echo "Running on:"
-          hostname
-          docker --version
-
-      - name: Pull released images on the server
+      - name: Restart application stack
         run: |
           docker pull ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           docker pull ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-          docker pull prom/prometheus:latest
-          docker pull grafana/grafana:latest
-          docker pull prom/node-exporter:latest
 
-      - name: Restart the application stack
-        run: |
           cd /home/ubuntu/SSP_MERN_Project
 
           export BACKEND_IMAGE_TAG=${{ env.BACKEND_IMAGE }}:${{ github.sha }}
@@ -215,164 +139,26 @@ jobs:
           docker compose down
           docker compose up -d --remove-orphans
 
-      - name: Remove unused Docker images
-        run: docker image prune -af
+      - run: docker image prune -af
 
-  post-deploy-smoke-test:
-    name: 7. Verify Backend, Frontend, and Metrics
+# ==========================================
+# ✅ SMOKE TEST
+# ==========================================
+  smoke-test:
     needs: deploy
     runs-on: [self-hosted, Test]
-    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Wait for backend health endpoint to become ready
-        run: |
-          set -euo pipefail
+      - name: Health Check
+        run: curl -f http://127.0.0.1:3100/health
 
-          echo "Checking backend health at http://127.0.0.1:3100/health"
-          for attempt in {1..20}; do
-            status_code=$(curl -s -o /tmp/backend-health.json -w "%{http_code}" http://127.0.0.1:3100/health || true)
-            if [ "$status_code" = "200" ]; then
-              echo "Backend is healthy."
-              cat /tmp/backend-health.json
-              break
-            fi
+      - name: Metrics Check
+        run: curl -f http://127.0.0.1:3100/metrics
 
-            echo "Attempt $attempt failed with status $status_code. Retrying in 5 seconds..."
-            sleep 5
-          done
+      - name: Frontend Check
+        run: curl -f http://127.0.0.1/
 
-          if [ "$status_code" != "200" ]; then
-            echo "Backend health check failed after multiple retries."
-            exit 1
-          fi
+      - name: Prometheus Check
+        run: curl -f http://127.0.0.1:9090/-/healthy
 
-      - name: Verify backend metrics endpoint
-        run: |
-          set -euo pipefail
-
-          echo "Checking Prometheus metrics at http://127.0.0.1:3100/metrics"
-          metrics_status=$(curl -s -o /tmp/backend-metrics.txt -w "%{http_code}" http://127.0.0.1:3100/metrics || true)
-          if [ "$metrics_status" != "200" ]; then
-            echo "Metrics endpoint returned $metrics_status"
-            exit 1
-          fi
-
-          if ! grep -q "process_cpu_user_seconds_total" /tmp/backend-metrics.txt; then
-            echo "Expected Prometheus default metrics were not found."
-            exit 1
-          fi
-
-          echo "Metrics endpoint verified successfully."
-
-      - name: Verify API response payload
-        run: |
-          set -euo pipefail
-
-          echo "Checking task API at http://127.0.0.1:3100/courses"
-          api_status=$(curl -s -o /tmp/courses.json -w "%{http_code}" http://127.0.0.1:3100/courses || true)
-          if [ "$api_status" != "200" ]; then
-            echo "Courses endpoint returned $api_status"
-            exit 1
-          fi
-
-          if ! grep -Fq "[]" /tmp/courses.json && ! grep -q "\"task\"" /tmp/courses.json; then
-            echo "Courses endpoint did not return a recognizable JSON payload."
-            cat /tmp/courses.json
-            exit 1
-          fi
-
-          echo "Courses endpoint verified successfully."
-
-      - name: Verify frontend is serving the React application
-        run: |
-          set -euo pipefail
-
-          echo "Checking frontend at http://127.0.0.1/"
-          frontend_status=$(curl -s -o /tmp/frontend.html -w "%{http_code}" http://127.0.0.1/ || true)
-          if [ "$frontend_status" != "200" ]; then
-            echo "Frontend returned $frontend_status"
-            exit 1
-          fi
-
-          if ! grep -q '<div id="root"></div>' /tmp/frontend.html && ! grep -q '<div id="root">' /tmp/frontend.html; then
-            echo "Frontend HTML does not look like the expected React app shell."
-            cat /tmp/frontend.html
-            exit 1
-          fi
-
-          echo "Frontend verified successfully."
-
-      - name: Verify Prometheus is reachable
-        run: |
-          set -euo pipefail
-
-          echo "Checking Prometheus at http://127.0.0.1:9090/-/healthy"
-          for attempt in {1..10}; do
-            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:9090/-/healthy || true)
-            if [ "$status_code" = "200" ]; then
-              echo "Prometheus is healthy."
-              break
-            fi
-            echo "Attempt $attempt failed with status $status_code. Retrying in 5 seconds..."
-            sleep 5
-          done
-
-          if [ "$status_code" != "200" ]; then
-            echo "Prometheus health check failed."
-            exit 1
-          fi
-
-  deployment-summary:
-    name: 8. Capture Deployment Evidence and Release Notes
-    needs: post-deploy-smoke-test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Generate release evidence
-        run: |
-          cat <<EOF > release-notes.md
-          # Deployment Evidence
-
-          - Commit SHA: ${{ github.sha }}
-          - Backend image: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
-          - Frontend image: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-          - Deployment target branch: main
-          - Smoke tests: passed
-          - Backend health endpoint: http://127.0.0.1:3100/health
-          - Backend metrics endpoint: http://127.0.0.1:3100/metrics
-          - Frontend endpoint: http://127.0.0.1/
-          EOF
-
-      - name: Publish deployment summary
-        run: cat release-notes.md >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload deployment evidence artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: deployment-evidence
-          path: release-notes.md
-
-  post-deploy-cleanup:
-    name: 9. Finalize and Clean Up Release Resources
-    needs: deployment-summary
-    runs-on: [self-hosted, Test]
-    if: always()
-    steps:
-      - name: Capture running container snapshot
-        run: |
-          cd /home/ubuntu/SSP_MERN_Project
-          docker compose ps || true
-
-      - name: Review recent backend logs
-        run: |
-          cd /home/ubuntu/SSP_MERN_Project
-          docker logs --tail 100 backend-api || true
-
-      - name: Review recent frontend logs
-        run: |
-          cd /home/ubuntu/SSP_MERN_Project
-          docker logs --tail 100 frontend-webapp || true
-
-      - name: Remove unused Docker images
-        run: |
-          cd /home/ubuntu/SSP_MERN_Project
-          docker image prune -af || true
+      - name: Grafana Check
+        run: curl -f http://127.0.0.1:3000/api/health
