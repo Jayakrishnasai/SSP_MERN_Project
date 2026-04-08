@@ -6,7 +6,6 @@ frontend/build/
 frontend/.cache/
 
 # Environment files - DO NOT COMMIT SECRETS
-.env
 backend/.env
 frontend/.env
 
