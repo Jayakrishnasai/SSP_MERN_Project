@@ -179,3 +179,142 @@ jobs:
 
       - name: Remove unused Docker images
         run: docker image prune -af
+
+  post-deploy-smoke-test:
+    name: 6. Verify Backend, Frontend, and Metrics
+    needs: deploy
+    runs-on: [self-hosted, Test]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Wait for backend health endpoint to become ready
+        run: |
+          set -euo pipefail
+
+          echo "Checking backend health at http://127.0.0.1:3100/health"
+          for attempt in {1..20}; do
+            status_code=$(curl -s -o /tmp/backend-health.json -w "%{http_code}" http://127.0.0.1:3100/health || true)
+            if [ "$status_code" = "200" ]; then
+              echo "Backend is healthy."
+              cat /tmp/backend-health.json
+              break
+            fi
+
+            echo "Attempt $attempt failed with status $status_code. Retrying in 5 seconds..."
+            sleep 5
+          done
+
+          if [ "$status_code" != "200" ]; then
+            echo "Backend health check failed after multiple retries."
+            exit 1
+          fi
+
+      - name: Verify backend metrics endpoint
+        run: |
+          set -euo pipefail
+
+          echo "Checking Prometheus metrics at http://127.0.0.1:3100/metrics"
+          metrics_status=$(curl -s -o /tmp/backend-metrics.txt -w "%{http_code}" http://127.0.0.1:3100/metrics || true)
+          if [ "$metrics_status" != "200" ]; then
+            echo "Metrics endpoint returned $metrics_status"
+            exit 1
+          fi
+
+          if ! grep -q "process_cpu_user_seconds_total" /tmp/backend-metrics.txt; then
+            echo "Expected Prometheus default metrics were not found."
+            exit 1
+          fi
+
+          echo "Metrics endpoint verified successfully."
+
+      - name: Verify API response payload
+        run: |
+          set -euo pipefail
+
+          echo "Checking task API at http://127.0.0.1:3100/courses"
+          api_status=$(curl -s -o /tmp/courses.json -w "%{http_code}" http://127.0.0.1:3100/courses || true)
+          if [ "$api_status" != "200" ]; then
+            echo "Courses endpoint returned $api_status"
+            exit 1
+          fi
+
+          if ! grep -Fq "[]" /tmp/courses.json && ! grep -q "\"task\"" /tmp/courses.json; then
+            echo "Courses endpoint did not return a recognizable JSON payload."
+            cat /tmp/courses.json
+            exit 1
+          fi
+
+          echo "Courses endpoint verified successfully."
+
+      - name: Verify frontend is serving the React application
+        run: |
+          set -euo pipefail
+
+          echo "Checking frontend at http://127.0.0.1/"
+          frontend_status=$(curl -s -o /tmp/frontend.html -w "%{http_code}" http://127.0.0.1/ || true)
+          if [ "$frontend_status" != "200" ]; then
+            echo "Frontend returned $frontend_status"
+            exit 1
+          fi
+
+          if ! grep -q '<div id="root"></div>' /tmp/frontend.html && ! grep -q '<div id="root">' /tmp/frontend.html; then
+            echo "Frontend HTML does not look like the expected React app shell."
+            cat /tmp/frontend.html
+            exit 1
+          fi
+
+          echo "Frontend verified successfully."
+
+  deployment-summary:
+    name: 7. Capture Deployment Evidence and Release Notes
+    needs: post-deploy-smoke-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate release evidence
+        run: |
+          cat <<EOF > release-notes.md
+          # Deployment Evidence
+
+          - Commit SHA: ${{ github.sha }}
+          - Backend image: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          - Frontend image: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          - Deployment target branch: main
+          - Smoke tests: passed
+          - Backend health endpoint: http://127.0.0.1:3100/health
+          - Backend metrics endpoint: http://127.0.0.1:3100/metrics
+          - Frontend endpoint: http://127.0.0.1/
+          EOF
+
+      - name: Publish deployment summary
+        run: cat release-notes.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload deployment evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-evidence
+          path: release-notes.md
+
+  post-deploy-cleanup:
+    name: 8. Finalize and Clean Up Release Resources
+    needs: deployment-summary
+    runs-on: [self-hosted, Test]
+    if: always()
+    steps:
+      - name: Capture running container snapshot
+        run: |
+          cd /home/ubuntu/SSP_MERN_Project
+          docker compose ps || true
+
+      - name: Review recent backend logs
+        run: |
+          cd /home/ubuntu/SSP_MERN_Project
+          docker logs --tail 100 backend-api || true
+
+      - name: Review recent frontend logs
+        run: |
+          cd /home/ubuntu/SSP_MERN_Project
+          docker logs --tail 100 frontend-webapp || true
+
+      - name: Remove unused Docker images
+        run: |
+          cd /home/ubuntu/SSP_MERN_Project
+          docker image prune -af || true
