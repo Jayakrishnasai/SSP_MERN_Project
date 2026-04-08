@@ -38,7 +38,7 @@ jobs:
 
       # Frontend
       - run: npm ci --prefix frontend
-      - run: npm test --prefix frontend
+      - run: npm test --prefix frontend -- --coverage --watchAll=false
 
   # ==========================================
   # 🔍 SONAR ANALYSIS
