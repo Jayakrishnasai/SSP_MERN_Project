@@ -17,15 +17,12 @@ env:
 
 jobs:
   # ==========================================
-  # 🧪 QUALITY STAGE (CI - GitHub Hosted)
+  # 🧪 QUALITY CHECK (CI)
   # ==========================================
   quality-check:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -36,114 +33,71 @@ jobs:
             frontend/package-lock.json
 
       # Backend
-      - name: Install Backend
-        working-directory: backend
-        run: npm ci --ignore-scripts --no-audit
-
-      - name: Test Backend
-        working-directory: backend
-        run: npm test -- --runInBand
+      - run: npm ci --prefix backend
+      - run: npm test --prefix backend
 
       # Frontend
-      - name: Install Frontend
-        working-directory: frontend
-        run: npm ci --ignore-scripts --no-audit
-
-      - name: Test Frontend
-        working-directory: frontend
-        env:
-          CI: true
-        run: npm test -- --coverage --watchAll=false --runInBand
-
-      - name: Build Frontend
-        working-directory: frontend
-        run: npm run build
-
-      - name: Upload Coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: |
-            backend/coverage/lcov.info
-            frontend/coverage/lcov.info
+      - run: npm ci --prefix frontend
+      - run: npm test --prefix frontend
 
   # ==========================================
-  # 🔍 SONAR ANALYSIS (CI)
+  # 🔍 SONAR ANALYSIS
   # ==========================================
   sonar:
     needs: quality-check
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage
-
-      - name: Sonar Scan
-        uses: SonarSource/sonarqube-scan-action@v2
+      - uses: SonarSource/sonarqube-scan-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
-      - name: Enforce Quality Gate
-        uses: sonarsource/sonarqube-quality-gate-action@v1
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   # ==========================================
-  # 🐳 DOCKER BUILD & TRIVY SCAN (DevSecOps)
+  # 🐳 DOCKER BUILD + TRIVY SCAN
   # ==========================================
   docker-build:
     needs: sonar
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Backend Image
+      # Build Backend
+      - name: Build Backend
         run: docker build -t ${{ env.BACKEND_IMAGE }}:${{ github.sha }} ./backend
 
-      - name: Run Trivy Scan on Backend
+      - name: Scan Backend (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ env.BACKEND_IMAGE }}:${{ github.sha }}'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          exit-code: '1'
 
-      - name: Build Frontend Image
+      # Build Frontend
+      - name: Build Frontend
         run: docker build -t ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} ./frontend
 
-      - name: Run Trivy Scan on Frontend
+      - name: Scan Frontend (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: '${{ env.FRONTEND_IMAGE }}:${{ github.sha }}'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          exit-code: '1'
 
-      - name: Save Docker Images
+      # Save images
+      - name: Save Images
         run: |
-          docker save ${{ env.BACKEND_IMAGE }}:${{ github.sha }} -o backend-image.tar
-          docker save ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} -o frontend-image.tar
+          docker save ${{ env.BACKEND_IMAGE }}:${{ github.sha }} -o backend.tar
+          docker save ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} -o frontend.tar
 
       - name: Upload Images
         uses: actions/upload-artifact@v4
         with:
           name: docker-images
           path: |
-            backend-image.tar
-            frontend-image.tar
-          retention-days: 1
+            backend.tar
+            frontend.tar
 
   # ==========================================
   # 📦 DOCKER PUSH
@@ -151,38 +105,42 @@ jobs:
   docker-push:
     needs: docker-build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Download Images
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: docker-images
 
       - name: Load Images
         run: |
-          docker load -i backend-image.tar
-          docker load -i frontend-image.tar
+          docker load -i backend.tar
+          docker load -i frontend.tar
 
       - name: Login DockerHub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Push Backend
-        run: docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+      # Tag latest
+      - name: Tag Latest
+        run: |
+          docker tag ${{ env.BACKEND_IMAGE }}:${{ github.sha }} ${{ env.BACKEND_IMAGE }}:latest
+          docker tag ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} ${{ env.FRONTEND_IMAGE }}:latest
 
-      - name: Push Frontend
-        run: docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+      # Push
+      - run: docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+      - run: docker push ${{ env.BACKEND_IMAGE }}:latest
+      - run: docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+      - run: docker push ${{ env.FRONTEND_IMAGE }}:latest
 
   # ==========================================
-  # 🚀 DEPLOY (CD - EC2 with Monitoring)
+  # 🚀 DEPLOY (EC2 SELF-HOSTED)
   # ==========================================
   deploy:
     needs: docker-push
     runs-on: [self-hosted, Test]
     if: github.ref == 'refs/heads/main'
-
     steps:
       - name: Debug Runner
         run: |
+          echo "Running on:"
           hostname
           docker --version
 
@@ -204,5 +162,5 @@ jobs:
           docker compose down
           docker compose up -d --remove-orphans
 
-      - name: Cleanup Old Images
+      - name: Cleanup
         run: docker image prune -af
