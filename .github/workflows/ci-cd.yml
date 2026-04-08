@@ -14,16 +14,14 @@ env:
   NODE_VERSION: "20"
   BACKEND_IMAGE: jayakrishnasai/ssp-backend
   FRONTEND_IMAGE: jayakrishnasai/ssp-frontend
-  GRAFANA_HOST_PORT: "3001"
+  GRAFANA_HOST_PORT: "3000"
 
 jobs:
-# ==========================================
-# 🧪 QUALITY CHECK
-# ==========================================
   quality-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -32,11 +30,15 @@ jobs:
             backend/package-lock.json
             frontend/package-lock.json
 
-      - run: npm ci --prefix backend
-      - run: npm test --prefix backend
+      - name: Backend Tests
+        run: |
+          npm ci --prefix backend
+          npm test --prefix backend
 
-      - run: npm ci --prefix frontend
-      - run: npm test --prefix frontend -- --coverage --watchAll=false
+      - name: Frontend Tests
+        run: |
+          npm ci --prefix frontend
+          npm test --prefix frontend -- --coverage --watchAll=false
 
       - uses: actions/upload-artifact@v4
         with:
@@ -45,15 +47,12 @@ jobs:
             backend/coverage/lcov.info
             frontend/coverage/lcov.info
 
-# ==========================================
-# 🔍 SONAR
-# ==========================================
   sonar:
     needs: quality-check
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           name: coverage
@@ -63,43 +62,40 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
-      - name: Wait for Sonar quality gate
+      - name: Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@master
-        timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
-# ==========================================
-# 🐳 BUILD + TRIVY
-# ==========================================
   docker:
     needs: sonar
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
       - name: Build Backend
         run: docker build -t ${{ env.BACKEND_IMAGE }}:${{ github.sha }} ./backend
 
-      - name: Scan Backend (Trivy)
+      - name: Scan Backend
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: "${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
-          severity: "CRITICAL"
-          exit-code: "1"
+          severity: CRITICAL
+          exit-code: 1
 
       - name: Build Frontend
         run: docker build -t ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} ./frontend
 
-      - name: Scan Frontend (Trivy)
+      - name: Scan Frontend
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: "${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
-          severity: "CRITICAL"
-          exit-code: "1"
+          severity: CRITICAL
+          exit-code: 1
 
-      - name: Login DockerHub
+      - name: Docker Login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Push Images
@@ -109,85 +105,99 @@ jobs:
 
           docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           docker push ${{ env.BACKEND_IMAGE }}:latest
-
           docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           docker push ${{ env.FRONTEND_IMAGE }}:latest
 
-# ==========================================
-# 🚀 DEPLOY
-# ==========================================
   deploy:
     needs: docker
     runs-on: [self-hosted, Test]
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Sync configuration files
+      - name: Sync Files
         run: |
           mkdir -p /home/ubuntu/SSP_MERN_Project
           cp docker-compose.yml /home/ubuntu/SSP_MERN_Project/
           cp -r prometheus /home/ubuntu/SSP_MERN_Project/
-          mkdir -p /home/ubuntu/SSP_MERN_Project/grafana/provisioning/datasources
-          mkdir -p /home/ubuntu/SSP_MERN_Project/grafana/provisioning/dashboards
-          mkdir -p /home/ubuntu/SSP_MERN_Project/grafana/dashboards
-          cp -r grafana/provisioning /home/ubuntu/SSP_MERN_Project/grafana/
-          cp -r grafana/dashboards /home/ubuntu/SSP_MERN_Project/grafana/
-          test -f /home/ubuntu/SSP_MERN_Project/grafana/dashboards/node-exporter.json
+          mkdir -p /home/ubuntu/SSP_MERN_Project/grafana
+          cp -r grafana/* /home/ubuntu/SSP_MERN_Project/grafana/
 
-      - name: Restart application stack
+      - name: Deploy (with rollback)
         run: |
+          cd /home/ubuntu/SSP_MERN_Project
+
           docker pull ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           docker pull ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-
-          cd /home/ubuntu/SSP_MERN_Project
 
           export BACKEND_IMAGE_TAG=${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           export FRONTEND_IMAGE_TAG=${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
 
-          docker compose down
-          docker compose up -d --remove-orphans
+          docker compose up -d --remove-orphans || {
+            echo "Deployment failed, rolling back..."
+            docker compose down
+            docker compose up -d
+            exit 1
+          }
 
-      - run: docker image prune -af
+      - name: Show Containers
+        run: docker ps
 
-# ==========================================
-# ✅ SMOKE TEST
-# ==========================================
+      - name: Cleanup
+        run: docker image prune -f
+
   smoke-test:
     needs: deploy
     runs-on: [self-hosted, Test]
-    timeout-minutes: 10
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     steps:
-      - name: Smoke Checks
-        shell: bash
+      - name: Health + Monitoring Checks
         run: |
-          set -euo pipefail
+          set -e
+          trap 'echo "Dump logs"; docker logs prometheus; docker logs grafana; docker logs backend-api' ERR
 
-          check_url() {
-            local name="$1"
-            local url="$2"
-            local attempts="${3:-12}"
-            local delay_seconds="${4:-5}"
-            local output="/tmp/${name}.out"
+          echo "Waiting for services..."
+          until curl -s http://127.0.0.1:9090/-/healthy; do sleep 3; done
 
-            echo "Checking ${name}: ${url}"
-            for attempt in $(seq 1 "${attempts}"); do
-              if curl --fail --silent --show-error --max-time 10 "${url}" >"${output}"; then
-                cat "${output}"
-                echo "${name} is healthy."
-                return 0
-              fi
+          curl -f http://127.0.0.1:3100/health
+          curl -f http://127.0.0.1/
+          curl -f http://127.0.0.1:9090/-/healthy
+          curl -f http://127.0.0.1:${{ env.GRAFANA_HOST_PORT }}/api/health
 
-              echo "Attempt ${attempt}/${attempts} failed for ${name}. Retrying in ${delay_seconds}s..."
-              sleep "${delay_seconds}"
-            done
+          echo "Checking metrics..."
+          curl -s http://127.0.0.1:3100/metrics | grep process_cpu_seconds_total
 
-            echo "${name} did not become healthy in time."
-            return 1
-          }
+          echo "Checking Prometheus..."
+          curl -s http://127.0.0.1:9090/api/v1/query?query=up | grep '"value"'
 
-          check_url backend http://127.0.0.1:3100/health
-          check_url metrics http://127.0.0.1:3100/metrics
-          check_url frontend http://127.0.0.1/
-          check_url prometheus http://127.0.0.1:9090/-/healthy
-          check_url grafana http://127.0.0.1:${{ env.GRAFANA_HOST_PORT }}/api/health
+          echo "Checking targets..."
+          curl -s http://127.0.0.1:9090/api/v1/targets | grep '"health":"up"'
+
+  notify:
+    needs: [smoke-test]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && always()
+
+    steps:
+      - name: Send Email Notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USER }}
+          password: ${{ secrets.EMAIL_PASS }}
+          subject: "SSP Pipeline - ${{ job.status }}"
+          body: |
+            Pipeline Status: ${{ job.status }}
+
+            Repo: ${{ github.repository }}
+            Branch: ${{ github.ref }}
+            Commit: ${{ github.sha }}
+
+            Logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          to: your_email@gmail.com
+          from: SSP CI/CD
