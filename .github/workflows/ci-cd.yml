@@ -138,7 +138,7 @@ jobs:
 # ==========================================
   deploy:
     needs: docker
-    runs-on: [self-hosted, ec2]   # 🔥 THIS IS THE KEY CHANGE
+    runs-on: [self-hosted, Test]   # 🔥 THIS IS THE KEY CHANGE
     if: github.ref == 'refs/heads/main'
 
     steps:
