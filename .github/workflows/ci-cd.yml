@@ -17,7 +17,7 @@ env:
 
 jobs:
   quality-check:
-    name: 1. Validate Backend and Frontend
+    name: 1. Quality Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -52,8 +52,8 @@ jobs:
             backend/coverage/lcov.info
             frontend/coverage/lcov.info
 
-  sonar:
-    name: 2. Run SonarCloud Analysis
+  sonarqube:
+    name: 2. SonarQube Analysis
     needs: quality-check
     runs-on: ubuntu-latest
     steps:
@@ -72,8 +72,8 @@ jobs:
           SONAR_HOST_URL: https://sonarcloud.io
 
   docker-build:
-    name: 3. Build and Security-Scan Docker Images
-    needs: sonar
+    name: 3. Build Docker Images
+    needs: sonarqube
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -112,9 +112,38 @@ jobs:
             backend.tar
             frontend.tar
 
-  docker-push:
-    name: 4. Push Docker Images to Docker Hub
+  trivy-scan:
+    name: 4. Trivy Security Scan
     needs: docker-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built Docker image artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-images
+
+      - name: Load Docker images for scanning
+        run: |
+          docker load -i backend.tar
+          docker load -i frontend.tar
+
+      - name: Scan backend image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+
+      - name: Scan frontend image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+
+  docker-push:
+    name: 5. Push Docker Images to Docker Hub
+    needs: trivy-scan
     runs-on: ubuntu-latest
     steps:
       - name: Download built Docker image artifacts
@@ -148,7 +177,7 @@ jobs:
         run: docker push ${{ env.FRONTEND_IMAGE }}:latest
 
   deploy:
-    name: 5. Deploy Application Stack
+    name: 6. Deploy Application Stack
     needs: docker-push
     runs-on: [self-hosted, Test]
     if: github.ref == 'refs/heads/main'
@@ -181,7 +210,7 @@ jobs:
         run: docker image prune -af
 
   post-deploy-smoke-test:
-    name: 6. Verify Backend, Frontend, and Metrics
+    name: 7. Verify Backend, Frontend, and Metrics
     needs: deploy
     runs-on: [self-hosted, Test]
     if: github.ref == 'refs/heads/main'
@@ -265,7 +294,7 @@ jobs:
           echo "Frontend verified successfully."
 
   deployment-summary:
-    name: 7. Capture Deployment Evidence and Release Notes
+    name: 8. Capture Deployment Evidence and Release Notes
     needs: post-deploy-smoke-test
     runs-on: ubuntu-latest
     steps:
@@ -294,7 +323,7 @@ jobs:
           path: release-notes.md
 
   post-deploy-cleanup:
-    name: 8. Finalize and Clean Up Release Resources
+    name: 9. Finalize and Clean Up Release Resources
     needs: deployment-summary
     runs-on: [self-hosted, Test]
     if: always()
